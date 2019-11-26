@@ -5,8 +5,9 @@
 //as well as the API for the code.
 #include "vex.h"
 
-void oneMotor(int speed, int spins);
-void twoMotors(int speed, int spins);
-void Paint_Screen();
+//enter the prototypes for other functions here
+//lift, claw, etc
+//drive function prototypes can go here but they should be in the DriveFunctions.h file
+void exampleFunction(void);
 
 #endif

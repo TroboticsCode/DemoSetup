@@ -15,7 +15,6 @@ motor Tester1 = motor(PORT17, ratio36_1, true);
 // VEXcode generated functions
 
 
-
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Text.
  * 

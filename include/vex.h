@@ -6,6 +6,7 @@
 /*    Author:       Vex Robotics                                              */
 /*    Created:      1 Feb 2019                                                */
 /*    Description:  Default header for V5 projects                            */
+/*                   No changes should be needed here!                        */
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
 //
@@ -28,7 +29,5 @@
 
 #define repeat(iterations)                                                     \
   for (int iterator = 0; iterator < iterations; iterator++)
-
- // void auton1(void)
 
 #endif

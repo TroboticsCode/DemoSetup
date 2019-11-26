@@ -1,26 +1,18 @@
 /*----------------------------------------------------------------------------*/
 /*                                                                            */
 /*    Module:       main.cpp                                                  */
-/*    Author:       VEX                                                       */
-/*    Created:      Thu Sep 26 2019                                           */
-/*    Description:  Clawbot Competition Template                              */
+/*    Author:       JBormann                                                  */
+/*    Created:      Nov. 2019                                                 */
+/*    Description:  Trobotics Template File                                   */
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
 
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Controller1          controller                    
-// ClawMotor            motor         3               
-// Tester1              motor         17              
-// ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
 #include "Autons.h"
 #include "Functions.h"
 
 using namespace vex;
-
 
 // A global instance of competition
 competition Competition;
@@ -59,7 +51,7 @@ void autonomous(void)
     break;
 
     case AutonB:
-      Auton2();
+  
     break;
           
     // Default = NO autonomous
@@ -77,16 +69,12 @@ void autonomous(void)
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
 
-void usercontrol(void) {
-  Auton1();
-
-  wait(2,seconds);
-
-  Auton2();
+void usercontrol(void) { 
   //add local user control variables here:
   int power;
-  //User control code here, inside the loop:
 
+  //User control code here, inside the loop:
+  //remove existing demo code and replace with you own! Then remove this comment
   while (1) {
     power = Controller1.Axis1.position(percent)+Controller1.Axis2.position(percent);
     ClawMotor.setVelocity(power, pct);
@@ -112,9 +100,9 @@ void usercontrol(void) {
   }
 }
 
-//
+
 // Main will set up the competition functions and callbacks.
-//
+
 int main() {
   // Set up callbacks for autonomous and driver control periods.
   Competition.autonomous(autonomous);

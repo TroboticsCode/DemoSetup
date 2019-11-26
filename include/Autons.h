@@ -5,19 +5,20 @@
 //as well as the API for the code.
 #include "vex.h"
 
+//add defines here as more auton routines are created
+//number them sequentially and match them to the cases names
+//in autonomous() in main.cpp
 #define NONE 0
 #define AutonR 1
 #define AutonB 2
 
 extern int state;
 
-//list the names of your autonomous programs here. the () assumes that there
-//are no parameters for these
-void Auton1();
-void Auton2();
-void cycle_autons();
+//auton support function prototypes
+void cycle_autons(void);
+void Paint_Screen(void);
 
-//Do not write the programs here. This is just a list of them. Write them 
-//down in the src folder as .cpp files
+//list the names of your autonomous programs here
+void Auton1(void);
 
 #endif
