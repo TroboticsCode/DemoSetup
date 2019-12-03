@@ -1,31 +1,48 @@
-/**************************************/
-/*  DriveFunctions.cpp                */
-/*   This file exisits as an evolving */
-/*   library of drive functions to    */
-/*   help get your robot moving fast! */
-/*   Its a work in progress!          */
-/**************************************/
+/********************************************************************
+ *    DriveFunctions.cpp
+ * This is where all the drive code lives for user and auton
+ * Make sure you have done all the configs in DriveFunctionsConfig.h
+ *******************************************************************/
 
-#include "DriveFunctions.h"
+#include "Functions.h"
+#include "DriveFunctionsConfig.h"
+using namespace vex;
 
-void oneMotor(int speed, int spins)
+#ifdef CHASSIS_4_MOTOR_INLINE
+  motor FrontLeft = motor(FrontLeftPort, GEAR_SET, true);
+  motor RearLeft = motor(RearLeftPort, GEAR_SET, true);
+  motor FrontRight = motor(FrontRightPort, GEAR_SET, false);
+  motor RearRight = motor(RearRightPort, GEAR_SET, false);
+
+#elif defined(CHASSIS_2_MOTOR_INLINE)
+  motor DriveLeft = motor(DriveLeftPort, GEAR_SET, true);
+  motor DriveRight = motor(DriveRightPort, GEAR_SET, false);
+
+#elif defined(CHASSIS_X_DRIVE)
+  //coming soon!
+#endif
+
+/**************************************************
+ * @brief: moves the robot forward or back
+ *    at a given speed
+ *
+ * @param distance: how far to move in inches, absolute value
+ * @param velocity: how fast to move, signed value
+ *                  sign determines direction
+ **************************************************/
+void moveLinear(float distance, int velocity)
 {
-  Tester1.setVelocity(speed,percent);
-  Tester1.spinFor(spins,turns);
-  Tester1.setStopping(brake);
-}
+  uint16_t rotations = distance/ROTATION_FACTOR;
 
-void twoMotors(int speed, int spins)
-{
-  Tester1.setVelocity(speed,percent);
-  ClawMotor.setVelocity(speed,percent);
+#ifdef CHASSIS_4_MOTOR_INLINE
+  FrontLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+  BackLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+  FrontRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+  BackRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
 
-  Tester1.setStopping(brake);
-  ClawMotor.setStopping(brake);
+#elif defined(CHASSIS_2_MOTOR_INLINE)
+  DriveRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+  DriveLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
 
-  Tester1.spinFor(spins,turns,false);
-  ClawMotor.spinFor(spins,turns);
-
-  Tester1.stop();
-  ClawMotor.stop();
+#endif
 }
