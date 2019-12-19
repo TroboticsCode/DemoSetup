@@ -1,6 +1,7 @@
 /********************************************************************
  *    DriveFunctions.h
- * this is where all the config variables for a robot are located. Change them to match your robot
+ * this is where all the config variables for a robot are located. 
+ * Change them to match your robot
  * these variables are used in DriveFunctions.cpp
  *******************************************************************/
 
@@ -11,6 +12,7 @@
 using namespace vex;
 
 #include <math.h>
+#include "PID.h"
 
 //function declarations
 void moveLinear(float distance, int velocity);
@@ -23,8 +25,8 @@ void moveRotate(uint16_t degrees, int velocity);
  * uncomment the chassis type here
  * x drive assumes 4 drive motors
  */
-#define CHASSIS_4_MOTOR_INLINE
-//#define CHASSIS_2_MOTOR_INLINE
+//#define CHASSIS_4_MOTOR_INLINE
+#define CHASSIS_2_MOTOR_INLINE
 //#define CHASSIS_X_DRIVE
 
 /*    Drive Motor Ports
@@ -88,12 +90,14 @@ float CIRCUMFERENCE = HYPOTENUSE * M_PI;
 * uncomment the color of gearset you
 * are using in the motors
 */
-#define RED   ratio18_1
-#define BLUE  ratio_36_1
+#define RED   ratio36_1
+#define BLUE  ratio18_1
 #define GREEN ratio6_1
 
 #define GEAR_SET    RED
 //#define GEAR_SET    BLUE
 //#define GEAR_SET    GREEN
+
+#define PID
 
 #endif

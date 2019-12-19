@@ -90,7 +90,7 @@ void usercontrol(void) {
     {
       Tester1.spin(reverse);
     }
-
+    else if(Controller1.ButtonY.pressed())
     else
     {
       Tester1.stop();

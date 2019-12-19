@@ -41,9 +41,29 @@ void moveLinear(float distance, int velocity)
   BackRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
 
 #elif defined(CHASSIS_2_MOTOR_INLINE)
+  #ifdef PID
+  pidStruct_t drivePID;
+  pidInit(&drivePID, 0.2, 1, 10);
+  drivePID.error = 10;
+
+  float motorPower = 0;
+  DriveRight.resetRotation();
+  DriveLeft.resetRotation();
+
+  while(drivePID.error > 0.1)
+  {
+    motorPower = pidCalculate(&drivePID, rotations, DriveRight.rotation(rev));
+    DriveRight.spin(forward, motorPower, pct);
+    DriveLeft.spin(reverse, motorPower, pct);
+
+    Brain.Screen.clearScreen();
+    Brain.Screen.print("Error: %f", drivePID.error);
+  }
+
+  #elif !defined PID
   DriveRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
   DriveLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
-
+  #endif
 #endif
 }
 
