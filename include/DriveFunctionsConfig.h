@@ -6,12 +6,15 @@
 
 #ifndef DRIVEFUNCTIONSCONFIG_H
 #define DRIVEFUNCTIONSCONFIG_H
+
+#include "vex.h"
 using namespace vex;
 
 #include <math.h>
 
 //function declarations
 void moveLinear(float distance, int velocity);
+void moveRotate(uint16_t degrees, int velocity);
 
 //this is where all the config variables for a robot are located. Change them to match your robot
 //these variables are used in DriveFunctions.cpp
@@ -50,11 +53,16 @@ void moveLinear(float distance, int velocity);
 #endif
 
 /*    Chassis Dimensions
- * Enter the length and width of 
+ * Enter the length and width 
+ * (from wheel center to wheel center) of 
  * your chassis here in inches
  */
  #define CHASSIS_WIDTH    12.0f
  #define CHASSIS_LENGTH   12.0f
+
+float HYPOTENUSE = sqrt(pow(CHASSIS_WIDTH,2) + pow(CHASSIS_LENGTH,2));
+float RADIUS = HYPOTENUSE/2.0f;
+float CIRCUMFERENCE = HYPOTENUSE * M_PI;
 
 /*     Wheel Size 
  * uncomment the size of drive wheel you are using

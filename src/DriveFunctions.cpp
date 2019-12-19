@@ -32,8 +32,25 @@ using namespace vex;
  **************************************************/
 void moveLinear(float distance, int velocity)
 {
-  uint16_t rotations = distance/ROTATION_FACTOR;
+  float rotations = distance/ROTATION_FACTOR;
 
+#ifdef CHASSIS_4_MOTOR_INLINE
+  FrontLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+  BackLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+  FrontRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+  BackRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+
+#elif defined(CHASSIS_2_MOTOR_INLINE)
+  DriveRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+  DriveLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+
+#endif
+}
+
+void moveRotate(uint16_t degrees, int velocity)
+{
+  float arcLength = (degrees/360) * CIRCUMFERENCE;
+  float rotations = arcLength/ROTATION_FACTOR;
 #ifdef CHASSIS_4_MOTOR_INLINE
   FrontLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
   BackLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
