@@ -15,8 +15,8 @@ using namespace vex;
   motor RearRight = motor(RearRightPort, GEAR_SET, false);
 
 #elif defined(CHASSIS_2_MOTOR_INLINE)
-  motor DriveLeft = motor(DriveLeftPort, GEAR_SET, true);
-  motor DriveRight = motor(DriveRightPort, GEAR_SET, false);
+  motor DriveLeft = motor(DriveLeftPort, GEAR_SET, false);
+  motor DriveRight = motor(DriveRightPort, GEAR_SET, true);
 
 #elif defined(CHASSIS_X_DRIVE)
   //coming soon!
@@ -32,7 +32,10 @@ using namespace vex;
  **************************************************/
 void moveLinear(float distance, int velocity)
 {
-  float rotations = distance/ROTATION_FACTOR;
+  float rotations = distance * (1/((float)ROTATION_FACTOR));
+  Brain.Screen.print("Rotations to turn: %f", rotations);
+  Brain.Screen.newLine();
+  Brain.Screen.print("Rotation Factor: %f", ROTATION_FACTOR);
 
 #ifdef CHASSIS_4_MOTOR_INLINE
   FrontLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
@@ -43,21 +46,25 @@ void moveLinear(float distance, int velocity)
 #elif defined(CHASSIS_2_MOTOR_INLINE)
   #ifdef PID
   pidStruct_t drivePID;
-  pidInit(&drivePID, 0.2, 1, 10);
+  pidInit(&drivePID, 0.6, 0.5, 10);
   drivePID.error = 10;
 
   float motorPower = 0;
   DriveRight.resetRotation();
   DriveLeft.resetRotation();
+ 
+  printPIDValues(&drivePID);
 
-  while(drivePID.error > 0.1)
+  while(drivePID.error > 0.05)
   {
-    motorPower = pidCalculate(&drivePID, rotations, DriveRight.rotation(rev));
+    //Brain.Screen.print("\nIn the loop");
+    //Brain.Screen.newLine();
+    printPIDValues(&drivePID);
+    motorPower = 100 * pidCalculate(&drivePID, rotations, DriveRight.rotation(rev));
     DriveRight.spin(forward, motorPower, pct);
-    DriveLeft.spin(reverse, motorPower, pct);
+    DriveLeft.spin(forward, motorPower, pct);
 
-    Brain.Screen.clearScreen();
-    Brain.Screen.print("Error: %f", drivePID.error);
+    wait(10, msec);
   }
 
   #elif !defined PID
@@ -66,6 +73,20 @@ void moveLinear(float distance, int velocity)
   #endif
 #endif
 }
+void moveStop(void)
+{
+#ifdef CHASSIS_4_MOTOR_INLINE
+  FrontLeft.stop();
+  BackLeft.stop();
+  FrontRight.stop();
+  BackRight.stop();
+
+#elif defined(CHASSIS_2_MOTOR_INLINE)
+  DriveRight.stop();
+  DriveLeft.stop();
+#endif
+}
+
 
 void moveRotate(uint16_t degrees, int velocity)
 {

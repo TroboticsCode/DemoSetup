@@ -6,6 +6,7 @@
 */
 #include "vex.h"
 #include <math.h>
+#include <stdlib.h>
 using namespace vex;
 
 typedef struct
@@ -14,7 +15,7 @@ typedef struct
   double kD = 0;
   int minDt = 10;
 
-  double error = 0;
+  double error = 10;
   double derivative = 0;
   double lastError = 0;
   double lastTime = 0;
@@ -24,3 +25,4 @@ typedef struct
 
 void pidInit(pidStruct_t* pid, double kP, double kD, int minDt);
 double pidCalculate(pidStruct_t* pid, double target, double current);
+void printPIDValues(pidStruct_t *pid);

@@ -11,6 +11,7 @@
 #include "vex.h"
 #include "Autons.h"
 #include "Functions.h"
+#include "DriveFunctionsConfig.h"
 
 using namespace vex;
 
@@ -72,6 +73,8 @@ void autonomous(void)
 void usercontrol(void) { 
   //add local user control variables here:
   int power;
+  moveLinear(24, 25);
+  moveStop();
 
   //User control code here, inside the loop:
   //remove existing demo code and replace with you own! Then remove this comment
@@ -90,7 +93,6 @@ void usercontrol(void) {
     {
       Tester1.spin(reverse);
     }
-    else if(Controller1.ButtonY.pressed())
     else
     {
       Tester1.stop();

@@ -17,6 +17,7 @@ using namespace vex;
 //function declarations
 void moveLinear(float distance, int velocity);
 void moveRotate(uint16_t degrees, int velocity);
+void moveStop(void);
 
 //this is where all the config variables for a robot are located. Change them to match your robot
 //these variables are used in DriveFunctions.cpp
@@ -62,9 +63,9 @@ void moveRotate(uint16_t degrees, int velocity);
  #define CHASSIS_WIDTH    12.0f
  #define CHASSIS_LENGTH   12.0f
 
-float HYPOTENUSE = sqrt(pow(CHASSIS_WIDTH,2) + pow(CHASSIS_LENGTH,2));
-float RADIUS = HYPOTENUSE/2.0f;
-float CIRCUMFERENCE = HYPOTENUSE * M_PI;
+#define HYPOTENUSE sqrt(pow(CHASSIS_WIDTH,2) + pow(CHASSIS_LENGTH,2))
+#define RADIUS  HYPOTENUSE/2.0f
+#define CIRCUMFERENCE HYPOTENUSE * M_PI
 
 /*     Wheel Size 
  * uncomment the size of drive wheel you are using
@@ -84,19 +85,19 @@ float CIRCUMFERENCE = HYPOTENUSE * M_PI;
  *  accounting for gear ration and wheel
  *  size
  */
- #define ROTATION_FACTOR M_PI * WHEEL_SIZE * GEAR_RATIO
+#define ROTATION_FACTOR M_PI * WHEEL_SIZE * GEAR_RATIO
 
 /*    Motor Gearset 
 * uncomment the color of gearset you
 * are using in the motors
 */
 #define RED   ratio36_1
-#define BLUE  ratio18_1
-#define GREEN ratio6_1
+#define BLUE  ratio6_1
+#define GREEN ratio18_1
 
-#define GEAR_SET    RED
+//#define GEAR_SET    RED
 //#define GEAR_SET    BLUE
-//#define GEAR_SET    GREEN
+#define GEAR_SET    GREEN
 
 #define PID
 
