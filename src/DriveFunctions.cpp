@@ -4,15 +4,14 @@
  * Make sure you have done all the configs in DriveFunctionsConfig.h
  *******************************************************************/
 
-#include "Functions.h"
 #include "DriveFunctionsConfig.h"
 using namespace vex;
 
 #ifdef CHASSIS_4_MOTOR_INLINE
   motor FrontLeft = motor(FrontLeftPort, GEAR_SET, true);
-  motor RearLeft = motor(RearLeftPort, GEAR_SET, true);
+  motor BackLeft = motor(BackLeftPort, GEAR_SET, true);
   motor FrontRight = motor(FrontRightPort, GEAR_SET, false);
-  motor RearRight = motor(RearRightPort, GEAR_SET, false);
+  motor BackRight = motor(BackRightPort, GEAR_SET, false);
 
 #elif defined(CHASSIS_2_MOTOR_INLINE)
   motor DriveLeft = motor(DriveLeftPort, GEAR_SET, false);
@@ -20,6 +19,10 @@ using namespace vex;
 
 #elif defined(CHASSIS_X_DRIVE)
   //coming soon!
+#endif
+
+#ifdef GYRO
+  inertial myGyro = inertial(GYRO_PORT);
 #endif
 
 /**************************************************
@@ -38,10 +41,40 @@ void moveLinear(float distance, int velocity)
   Brain.Screen.print("Rotation Factor: %f", ROTATION_FACTOR);
 
 #ifdef CHASSIS_4_MOTOR_INLINE
-  FrontLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
-  BackLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
-  FrontRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
-  BackRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+  #ifdef PID
+    pidStruct_t drivePID;
+    pidInit(&drivePID, 0.3, 0.5, 0.01, 10);
+    drivePID.error = 10;
+
+    float motorPower = 0;
+    FrontLeft.resetRotation();
+    FrontRight.resetRotation();
+    BackLeft.resetRotation();
+    BackRight.resetRotation();
+  
+    printPIDValues(&drivePID);
+
+    while(drivePID.error > 0.05  && drivePID.error > 0.05)
+    {
+      //Brain.Screen.print("\nIn the loop");
+      //Brain.Screen.newLine();
+      printPIDValues(&drivePID);
+      motorPower = 100 * pidCalculate(&drivePID, rotations, FrontRight.rotation(rev));
+
+      FrontRight.spin(forward, motorPower, pct);
+      FrontLeft.spin(forward, motorPower, pct);
+      BackLeft.spin(forward, motorPower, pct);
+      BackRight.spin(forward, motorPower, pct);
+
+      wait(10, msec);
+    }
+  
+  #elif !defined(PID)
+    FrontLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+    BackLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+    FrontRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+    BackRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+  #endif
 
 #elif defined(CHASSIS_2_MOTOR_INLINE)
   #ifdef PID
@@ -73,6 +106,7 @@ void moveLinear(float distance, int velocity)
   #endif
 #endif
 }
+
 void moveStop(void)
 {
 #ifdef CHASSIS_4_MOTOR_INLINE
@@ -92,11 +126,41 @@ void moveRotate(uint16_t degrees, int velocity)
 {
   float arcLength = (degrees/360) * CIRCUMFERENCE;
   float rotations = arcLength/ROTATION_FACTOR;
+
 #ifdef CHASSIS_4_MOTOR_INLINE
-  FrontLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
-  BackLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
-  FrontRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
-  BackRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+  #if defined(PID) && defined(GYRO)
+    myGyro.calibrate();
+    while(myGyro.isCalibrating());
+    myGyro.resetHeading();
+
+    pidStruct_t rotatePID;
+    pidInit(&rotatePID, 0.2, 0.5, 0.01, 10);
+    rotatePID.error = 10;
+
+    float motorPower = 0;
+  
+    printPIDValues(&rotatePID);
+
+    while(rotatePID.error > 0.05 && rotatePID.error < 0.05)
+    {
+      printPIDValues(&rotatePID);
+
+      motorPower = 100 * pidCalculate(&rotatePID, degrees, myGyro.heading(rotationUnits::deg));
+
+      FrontRight.spin(forward, motorPower, pct);
+      FrontLeft.spin(reverse, motorPower, pct);
+      BackRight.spin(forward, motorPower, pct);
+      BackLeft.spin(reverse, motorPower, pct);
+
+      wait(10, msec);
+    }
+  
+  #elif !defined(PID) && !defined(GYRO)
+    FrontLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+    BackLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+    FrontRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+    BackRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+  #endif
 
 #elif defined(CHASSIS_2_MOTOR_INLINE)
   DriveRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);

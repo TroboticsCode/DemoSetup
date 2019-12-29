@@ -1,3 +1,8 @@
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// Inertial12           inertial      12              
+// ---- END VEXCODE CONFIGURED DEVICES ----
 /*----------------------------------------------------------------------------*/
 /*                                                                            */
 /*    Module:       main.cpp                                                  */
@@ -73,7 +78,15 @@ void autonomous(void)
 void usercontrol(void) { 
   //add local user control variables here:
   int power;
+  
   moveLinear(24, 25);
+  moveStop();
+  moveRotate(90, 25);
+  moveStop();
+  moveLinear(24, 25);
+  moveStop();
+  moveRotate(90, 25);
+
   moveStop();
 
   //User control code here, inside the loop:

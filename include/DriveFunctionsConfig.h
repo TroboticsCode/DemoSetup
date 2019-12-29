@@ -26,8 +26,8 @@ void moveStop(void);
  * uncomment the chassis type here
  * x drive assumes 4 drive motors
  */
-//#define CHASSIS_4_MOTOR_INLINE
-#define CHASSIS_2_MOTOR_INLINE
+#define CHASSIS_4_MOTOR_INLINE
+//#define CHASSIS_2_MOTOR_INLINE
 //#define CHASSIS_X_DRIVE
 
 /*    Drive Motor Ports
@@ -42,10 +42,10 @@ void moveStop(void);
   extern motor BackLeft;
   extern motor BackRight;
 
-  #define FrontLeftPort     PORT1
-  #define FrontRightPort    PORT2
-  #define RearLeftPort      PORT3
-  #define RearRightPort     PORT4
+  #define FrontLeftPort     PORT9
+  #define FrontRightPort    PORT6
+  #define BackLeftPort      PORT11
+  #define BackRightPort     PORT20
 
 #elif defined(CHASSIS_2_MOTOR_INLINE)
   extern motor DriveLeft;
@@ -100,5 +100,11 @@ void moveStop(void);
 #define GEAR_SET    GREEN
 
 #define PID
+#define GYRO
+
+#ifdef GYRO
+  extern inertial myGyro;
+  #define GYRO_PORT PORT19
+#endif
 
 #endif
