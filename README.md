@@ -5,6 +5,4 @@ The goal of this repository is act as a clean "master" copy of a default setup i
 
 Motor names and port numbers will need to be changes in robot-config.h and robot-config.c
 
-VexCode refernce: https://help.vexcodingstudio.com/index.html 
-
-                  https://api.vexcode.cloud/v5/html/index.html
+VexCode refernce: https://help.vexcodingstudio.com/index.html, https://api.vexcode.cloud/v5/html/index.html
