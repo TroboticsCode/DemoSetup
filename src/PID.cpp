@@ -3,9 +3,10 @@
 
 using namespace vex;
 
-void pidInit(pidStruct_t* pid, double kP, double kD, int minDt)
+void pidInit(pidStruct_t* pid, double kP, double kI, double kD, int minDt)
 {
   pid->kP = kP;
+  pid->kI = kI;
   pid->kD = kD;
   pid->minDt = minDt;
 
@@ -21,8 +22,9 @@ double pidCalculate(pidStruct_t *pid, double target, double current)
     return pid->lastOutput;
 
   pid->derivative = (pid->error - pid->lastError)/dT;
+  pid->integral += (pid->error * dT);
 
-  pid->output = (pid->error * pid->kP) + (pid->derivative * pid->kD);
+  pid->output = (pid->error * pid->kP) + (pid->integral * pid->kI) + (pid->derivative * pid->kD);
 
   if((pid->output) > 100)
   {

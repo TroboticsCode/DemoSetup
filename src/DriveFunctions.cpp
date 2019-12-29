@@ -46,7 +46,7 @@ void moveLinear(float distance, int velocity)
 #elif defined(CHASSIS_2_MOTOR_INLINE)
   #ifdef PID
   pidStruct_t drivePID;
-  pidInit(&drivePID, 0.6, 0.5, 10);
+  pidInit(&drivePID, 0.6, 0, 0.5, 10);
   drivePID.error = 10;
 
   float motorPower = 0;
