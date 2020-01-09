@@ -26,8 +26,8 @@ void moveStop(void);
  * uncomment the chassis type here
  * x drive assumes 4 drive motors
  */
-#define CHASSIS_4_MOTOR_INLINE
-//#define CHASSIS_2_MOTOR_INLINE
+//#define CHASSIS_4_MOTOR_INLINE
+#define CHASSIS_2_MOTOR_INLINE
 //#define CHASSIS_X_DRIVE
 
 /*    Drive Motor Ports
@@ -51,8 +51,8 @@ void moveStop(void);
   extern motor DriveLeft;
   extern motor DriveRight;
 
-  #define DriveLeftPort     PORT1
-  #define DriveRightPort    PORT2
+  #define DriveLeftPort     PORT19
+  #define DriveRightPort    PORT18
 #endif
 
 /*    Chassis Dimensions
@@ -60,7 +60,7 @@ void moveStop(void);
  * (from wheel center to wheel center) of 
  * your chassis here in inches
  */
- #define CHASSIS_WIDTH    12.0f
+ #define CHASSIS_WIDTH    24.0f
  #define CHASSIS_LENGTH   12.0f
 
 #define HYPOTENUSE sqrt(pow(CHASSIS_WIDTH,2) + pow(CHASSIS_LENGTH,2))
@@ -99,12 +99,12 @@ void moveStop(void);
 //#define GEAR_SET    BLUE
 #define GEAR_SET    GREEN
 
-#define PID
+//#define PID
 #define GYRO
 
 #ifdef GYRO
   extern inertial myGyro;
-  #define GYRO_PORT PORT19
+  #define GYRO_PORT PORT20
 #endif
 
 #endif

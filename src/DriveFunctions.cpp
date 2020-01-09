@@ -88,7 +88,7 @@ void moveLinear(float distance, int velocity)
  
   printPIDValues(&drivePID);
 
-  while(drivePID.error > 0.05)
+  while(drivePID.error > 0.05 && drivePID.error < 0.05)
   {
     //Brain.Screen.print("\nIn the loop");
     //Brain.Screen.newLine();
@@ -127,44 +127,59 @@ void moveRotate(uint16_t degrees, int velocity)
   float arcLength = (degrees/360) * CIRCUMFERENCE;
   float rotations = arcLength/ROTATION_FACTOR;
 
-#ifdef CHASSIS_4_MOTOR_INLINE
-  #if defined(PID) && defined(GYRO)
+#if defined(PID) 
+  #ifdef GYRO
     myGyro.calibrate();
     while(myGyro.isCalibrating());
     myGyro.resetHeading();
-
-    pidStruct_t rotatePID;
-    pidInit(&rotatePID, 0.2, 0.5, 0.01, 10);
-    rotatePID.error = 10;
-
-    float motorPower = 0;
-  
-    printPIDValues(&rotatePID);
-
-    while(rotatePID.error > 0.05 && rotatePID.error < 0.05)
-    {
-      printPIDValues(&rotatePID);
-
-      motorPower = 100 * pidCalculate(&rotatePID, degrees, myGyro.heading(rotationUnits::deg));
-
-      FrontRight.spin(forward, motorPower, pct);
-      FrontLeft.spin(reverse, motorPower, pct);
-      BackRight.spin(forward, motorPower, pct);
-      BackLeft.spin(reverse, motorPower, pct);
-
-      wait(10, msec);
-    }
-  
-  #elif !defined(PID) && !defined(GYRO)
-    FrontLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
-    BackLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
-    FrontRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
-    BackRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
   #endif
 
-#elif defined(CHASSIS_2_MOTOR_INLINE)
-  DriveRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
-  DriveLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+  pidStruct_t rotatePID;
+  pidInit(&rotatePID, 0.2, 0.5, 0.01, 10);
+  rotatePID.error = 10;
 
-#endif
+  float motorPower = 0;
+
+  printPIDValues(&rotatePID);
+
+  while(rotatePID.error > 0.05 && rotatePID.error < 0.05)
+  {
+    printPIDValues(&rotatePID);
+
+  #if defined(PID) && defined (GYRO)
+    motorPower = 100 * pidCalculate(&rotatePID, degrees, myGyro.heading(rotationUnits::deg));
+  #elif defined(PID) && !(GYRO)
+    #ifdef CHASSIS_4_MOTOR_INLINE
+      motorPower = 100 * pidCalculate(&rotatePID, rotations, FrontRight.rotation(rev));
+    #elif defined CHASSIS_2_MOTOR_INLINE
+      motorPower = 100 * pidCalculate(&rotatePID, rotations, DriveRight.rotation(rev));
+    #endif
+  #endif
+
+  #ifdef CHASSIS_4_MOTOR_INLINE
+    FrontRight.spin(forward, motorPower, pct);
+    FrontLeft.spin(reverse, motorPower, pct);
+    BackRight.spin(forward, motorPower, pct);
+    BackLeft.spin(reverse, motorPower, pct);
+
+  #elif defined CHASSIS_2_MOTOR_INLINE
+    DriveRight.spin(forward, motorPower, pct);
+    DriveLeft.spin(reverse, motorPower, pct);
+  #endif
+
+    wait(10, msec);
+  }
+
+  #elif !defined(PID) && !defined(GYRO)
+    #ifdef CHASSIS_4_MOTOR_INLINE
+      FrontLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+      BackLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+      FrontRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+      BackRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+
+    #elif defined CHASSIS_2_MOTOR_INLINE
+      DriveRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+      DriveLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+    #endif
+  #endif
 }

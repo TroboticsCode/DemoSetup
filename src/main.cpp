@@ -79,15 +79,15 @@ void usercontrol(void) {
   //add local user control variables here:
   int power;
   
-  moveLinear(24, 25);
-  moveStop();
-  moveRotate(90, 25);
-  moveStop();
-  moveLinear(24, 25);
-  moveStop();
-  moveRotate(90, 25);
+    moveLinear(24, 25);
+    moveStop();
+    moveRotate(90, 25);
+    moveStop();
 
-  moveStop();
+    moveStop();
+    wait(20, msec); // Sleep the task for a short amount of time to
+
+  
 
   //User control code here, inside the loop:
   //remove existing demo code and replace with you own! Then remove this comment
