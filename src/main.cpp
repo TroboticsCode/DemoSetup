@@ -79,16 +79,6 @@ void usercontrol(void) {
   //add local user control variables here:
   int power;
   
-    moveLinear(24, 25);
-    moveStop();
-    moveRotate(90, 25);
-    moveStop();
-
-    moveStop();
-    wait(20, msec); // Sleep the task for a short amount of time to
-
-  
-
   //User control code here, inside the loop:
   //remove existing demo code and replace with you own! Then remove this comment
   while (1) {
@@ -96,6 +86,11 @@ void usercontrol(void) {
     ClawMotor.setVelocity(power, pct);
     ClawMotor.spin(reverse);
     Controller1.ButtonY.pressed(autonomous);
+
+    #ifdef CHASSIS_2_MOTOR_INLINE
+      DriveRight.spin(directionType::fwd, (Controller1.Axis2.value() - Controller1.Axis1.value()), velocityUnits::pct);
+      DriveLeft.spin(directionType::fwd, (Controller1.Axis2.value() + Controller1.Axis1.value()), velocityUnits::pct);
+    #endif
 
     if (Controller1.ButtonA.pressing())
     {
@@ -110,6 +105,8 @@ void usercontrol(void) {
     {
       Tester1.stop();
     }
+
+    Controller1.ButtonX.pressed(testPID);
 
     wait(20, msec); // Sleep the task for a short amount of time to
   }

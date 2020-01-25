@@ -16,7 +16,7 @@ using namespace vex;
 
 //function declarations
 void moveLinear(float distance, int velocity);
-void moveRotate(uint16_t degrees, int velocity);
+void moveRotate(int16_t degrees, int velocity);
 void moveStop(void);
 
 //this is where all the config variables for a robot are located. Change them to match your robot
@@ -51,8 +51,8 @@ void moveStop(void);
   extern motor DriveLeft;
   extern motor DriveRight;
 
-  #define DriveLeftPort     PORT19
-  #define DriveRightPort    PORT18
+  #define DriveLeftPort     PORT1
+  #define DriveRightPort    PORT2
 #endif
 
 /*    Chassis Dimensions
@@ -60,8 +60,8 @@ void moveStop(void);
  * (from wheel center to wheel center) of 
  * your chassis here in inches
  */
- #define CHASSIS_WIDTH    24.0f
- #define CHASSIS_LENGTH   12.0f
+ #define CHASSIS_WIDTH    9.5f
+ #define CHASSIS_LENGTH   10.75f
 
 #define HYPOTENUSE sqrt(pow(CHASSIS_WIDTH,2) + pow(CHASSIS_LENGTH,2))
 #define RADIUS  HYPOTENUSE/2.0f
@@ -99,12 +99,12 @@ void moveStop(void);
 //#define GEAR_SET    BLUE
 #define GEAR_SET    GREEN
 
-//#define PID
-#define GYRO
+#define PID
+//#define GYRO
 
 #ifdef GYRO
   extern inertial myGyro;
-  #define GYRO_PORT PORT20
+  #define GYRO_PORT PORT5
 #endif
 
 #endif

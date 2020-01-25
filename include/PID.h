@@ -14,6 +14,7 @@ typedef struct
   double kP = 0;
   double kD = 0;
   double kI = 0;
+  double slewRate = 0;
   int minDt = 10;
 
   double error = 10;
@@ -25,6 +26,6 @@ typedef struct
   double lastOutput = 0;
 } pidStruct_t;
 
-void pidInit(pidStruct_t* pid, double kP, double kI, double kD, int minDt);
+void pidInit(pidStruct_t* pid, double kP, double kI, double kD, double slewRate, int minDt);
 double pidCalculate(pidStruct_t* pid, double target, double current);
 void printPIDValues(pidStruct_t *pid);
