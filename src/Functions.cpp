@@ -4,13 +4,13 @@
 
 void testPID()
 {
-  for(int i = 0; i < 4; i++)
+  for(int i = 3; i < 4; i++)
   {
-    moveLinear(24, 30);
-    moveStop();
-    moveRotate(90, 20);
-    moveStop();
-    moveLinear(24, 30);
+    moveLinear(24, 100);
+    //moveStop();
+   // moveRotate(90, 100);
+    //moveStop();
+   /* moveLinear(24, 30);
     moveStop();
     moveRotate(90, 20);
     moveStop(); 
@@ -21,7 +21,7 @@ void testPID()
     moveLinear(24, 30);
     moveStop();
     moveRotate(90, 12);
-    moveStop();
+    moveStop();*/
   }
 
     wait(20, msec); // Sleep the task for a short amount of time t

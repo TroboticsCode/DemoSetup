@@ -27,19 +27,19 @@ double pidCalculate(pidStruct_t *pid, double target, double current)
 
   pid->output = (pid->error * pid->kP) + (pid->integral * pid->kI) + (pid->derivative * pid->kD);
 
-//constrain output
-  if(pid->output > 1)
-    pid->output = 1; 
-  if(pid->output < -1)
-    pid->output = -1;
-
 //slewing
   if((pid->output > pid->lastOutput) && fabs(pid->lastOutput - pid->output) > pid->slewRate)
-    pid->output -= pid->slewRate;
+    pid->output = pid->lastOutput + pid->slewRate;
   
   else if((pid->output < pid->lastOutput) && fabs(pid->lastOutput - pid->output) > pid->slewRate)
-    pid->output += pid->slewRate;
+    pid->output = pid->lastOutput - pid->slewRate;
    
+  //constrain output
+  if(pid->output > 100)
+    pid->output = 100; 
+  if(pid->output < -100)
+    pid->output = -100;
+
   pid->lastError = pid->error;
   pid->lastTime = Brain.timer(timeUnits::msec);
 
