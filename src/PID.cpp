@@ -33,7 +33,7 @@ double pidCalculate(pidStruct_t *pid, double target, double current)
   
   else if((pid->output < pid->lastOutput) && fabs(pid->lastOutput - pid->output) > pid->slewRate)
     pid->output = pid->lastOutput - pid->slewRate;
-   
+  
   //constrain output
   if(pid->output > 100)
     pid->output = 100; 
@@ -42,6 +42,32 @@ double pidCalculate(pidStruct_t *pid, double target, double current)
 
   pid->lastError = pid->error;
   pid->lastTime = Brain.timer(timeUnits::msec);
+
+  //moving averages filter
+  if(pid->numIterations > SAMPLES_AVG) //array has been filled, calculate average
+  {
+    //make room for the next sample
+    for(int i = 0; i < (SAMPLES_AVG-1); i++)
+    {
+      pid->errorSamples[i] = pid->errorSamples[i+1];
+    }
+
+    //place the new sample at the end of the array
+    pid->errorSamples[SAMPLES_AVG-1] = pid->error;
+
+    //add all samples and et average
+    for(int i = 0; i < SAMPLES_AVG; i++)
+    {
+      pid->avgError += pid->errorSamples[i];
+    }
+    pid->avgError /= (float)SAMPLES_AVG;
+  }
+  else //fill the array
+  {
+    pid->errorSamples[pid->numIterations] = pid->error;
+    pid->numIterations++;
+    pid->avgError = pid->error;
+  }
 
   pid->lastOutput = pid->output;
   return pid->output;
@@ -52,6 +78,8 @@ void printPIDValues(pidStruct_t *pid)
   Brain.Screen.clearScreen();
   Brain.Screen.setCursor(1, 1);
   Brain.Screen.print("Error: %f\n", pid->error);
+  Brain.Screen.newLine();
+  Brain.Screen.print("Average Error: %f\n", pid->avgError);
   Brain.Screen.newLine();
   Brain.Screen.print("Integral: %f\n", pid->integral);
   Brain.Screen.newLine();

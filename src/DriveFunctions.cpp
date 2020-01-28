@@ -42,21 +42,18 @@ void moveLinear(float distance, int velocity)
   wait(1, sec);
 
 #if defined(PID)
-  float motorPower = 0;
+  float DriveR_Power = 0;
+  float DriveL_Power = 0;
+
+  pidStruct_t driveL_PID;
+  pidStruct_t driveR_PID;
+
+  pidInit(&driveL_PID, 80, 0, 10, 10, 20);
+  pidInit(&driveR_PID, 80, 0, 10, 10, 20);
 
   #if defined (CHASSIS_2_MOTOR_INLINE)
-    float DriveR_Power = 0;
-    float DriveL_Power = 0;
-
-    pidStruct_t driveL_PID;
-    pidStruct_t driveR_PID;
-
-    pidInit(&driveL_PID, 40, 1, 0, 10, 10);
-    pidInit(&driveR_PID, 40, 1, 0, 10, 10);
-
     DriveRight.resetRotation();
     DriveLeft.resetRotation();
-
   #elif defined(CHASSIS_4_MOTOR_INLINE)
     FrontLeft.resetRotation();
     FrontRight.resetRotation();
@@ -68,8 +65,6 @@ void moveLinear(float distance, int velocity)
 
   do
   {
-    while(fabs(driveR_PID.error) > 0.05 || fabs(driveL_PID.error) > 0.05)
-    {
     #if defined (CHASSIS_2_MOTOR_INLINE)
       printPIDValues(&driveR_PID);
       DriveR_Power = (velocity/100.0f) * pidCalculate(&driveR_PID, rotations, DriveRight.rotation(rev));
@@ -79,32 +74,16 @@ void moveLinear(float distance, int velocity)
       DriveLeft.spin(forward, DriveL_Power, pct);
 
     #elif defined (CHASSIS_4_MOTOR_INLINE)
-      FrontRight.spin(forward, motorPower, pct);
-      FrontLeft.spin(forward, motorPower, pct);
-      BackLeft.spin(forward, motorPower, pct);
-      BackRight.spin(forward, motorPower, pct);
+      DriveR_Power = (velocity/100.0f) * pidCalculate(&driveR_PID, rotations, BackRight.rotation(rev));
+      DriveL_Power = (velocity/100.0f) * pidCalculate(&driveL_PID, rotations, BackeLeft.rotation(rev));
+
+      FrontRight.spin(forward, DriveR_Power, pct);
+      FrontLeft.spin(forward, DriveL_Power, pct);
+      BackLeft.spin(forward, DriveL_Power, pct);
+      BackRight.spin(forward, DriveR_Power, pct);
     #endif
-    }
-
-    for(int i = 100; i > 0; i--)
-    {
-    #ifdef CHASSIS_4_MOTOR_INLINE
-      FrontLeft.stop();
-      BackLeft.stop();
-      FrontRight.stop();
-      BackRight.stop();
-
-    #elif defined(CHASSIS_2_MOTOR_INLINE)
-      DriveRight.stop(brakeType::coast);
-      DriveLeft.stop(brakeType::coast);
-    #endif
-      wait(1, msec);
-    }
-       // task::sleep(300);
-    pidCalculate(&driveR_PID, rotations, DriveRight.rotation(rev));
-    pidCalculate(&driveL_PID, rotations, DriveLeft.rotation(rev));
-
-  }while(fabs(driveR_PID.error) > 0.05 || fabs(driveL_PID.error) > 0.05);
+    
+  }while(fabs(driveR_PID.avgError) > 0.05 || fabs(driveL_PID.avgError) > 0.05);
 
 #elif !defined (PID)
   #if defined (CHASSIS_2_MOTOR_INLINE)
@@ -157,50 +136,88 @@ void moveRotate(int16_t degrees, int velocity)
 
 #if defined(PID) 
   #ifdef GYRO
-    myGyro.startCalibration();
+    myGyro.calibrate();
     while(myGyro.isCalibrating());
-    myGyro.resetHeading();
+    myGyro.resetRotation();
   #endif
 
   #ifdef CHASSIS_2_MOTOR_INLINE
     DriveLeft.resetRotation();
     DriveRight.resetRotation();
+  #elif defined CHASSIS_4_MOTOR_INLINE
+    FrontLeft.resetRotation();
+    FrontRight.resetRotation();
+    BackLeft.resetRotation();
+    BackRight.resetRotation();
   #endif
 
-  pidStruct_t rotatePID;
-  pidInit(&rotatePID, 0.8, 0.01, 0, 1, 10);
-  rotatePID.error = 10;
-  float motorPower = 0;
+  #if !defined GYRO
+    pidStruct_t rotateR_PID;
+    pidStruct_t rotateL_PID;
 
-  printPIDValues(&rotatePID);
+    pidInit(&rotateR_PID, 2, 0, 0.57, 8, 10);
+    pidInit(&rotateL_PID, 2, 0, 0.57, 8, 10);
 
-  while(fabs(rotatePID.error) > 0.1)
+    float DriveR_Power = 0;
+    float DriveL_Power = 0;
+
+  #elif defined GYRO
+    pidStruct_t rotatePID;
+    pidInit(&rotatePID, 2, 0, 0.57, 8, 10);
+
+    float motorPower = 0;
+  #endif
+
+  do
   {
+  #if defined (GYRO)
     printPIDValues(&rotatePID);
+    motorPower = (velocity/100.0f) * pidCalculate(&rotatePID, degrees, myGyro.rotation(rotationUnits::deg));
+  #elif !defined (GYRO)
+    printPIDValues(&rotateR_PID);
 
-  #if defined(PID) && defined (GYRO)
-    motorPower = (velocity/100.0f) * pidCalculate(&rotatePID, degrees, myGyro.heading(rotationUnits::deg));
-  #elif defined(PID) && !(GYRO)
     #ifdef CHASSIS_4_MOTOR_INLINE
-      motorPower = (velocity/100.0f) * pidCalculate(&rotatePID, rotations, FrontRight.rotation(rev));
+      DriveL_Power = (velocity/100.0f) * pidCalculate(&rotateL_PID, rotations, BackLeft.rotation(rev));
+      DriveR_Power = (velocity/100.0f) * pidCalculate(&rotateR_PID, rotations, BackRight.rotation(rev));
     #elif defined CHASSIS_2_MOTOR_INLINE
-      motorPower = (velocity/100.0f) * pidCalculate(&rotatePID, rotations, DriveLeft.rotation(rev));
+      DriveL_Power = (velocity/100.0f) * pidCalculate(&rotateL_PID, (-1 * rotations), (-1 * DriveLeft.rotation(rev)));
+      DriveR_Power = (velocity/100.0f) * pidCalculate(&rotateR_PID, rotations, DriveRight.rotation(rev));
     #endif
   #endif
 
-  #ifdef CHASSIS_4_MOTOR_INLINE
-    FrontRight.spin(forward, motorPower, pct);
-    FrontLeft.spin(reverse, motorPower, pct);
-    BackRight.spin(forward, motorPower, pct);
-    BackLeft.spin(reverse, motorPower, pct);
+  #if defined (GYRO)
+    #ifdef CHASSIS_4_MOTOR_INLINE
+      FrontRight.spin(forward, motorPower, pct);
+      FrontLeft.spin(reverse, motorPower, pct);
+      BackRight.spin(forward, motorPower, pct);
+      BackLeft.spin(reverse, motorPower, pct);
 
-  #elif defined CHASSIS_2_MOTOR_INLINE
-    DriveRight.spin(reverse, motorPower, pct);
-    DriveLeft.spin(forward, motorPower, pct);
+    #elif defined CHASSIS_2_MOTOR_INLINE
+      DriveRight.spin(reverse, motorPower, pct);
+      DriveLeft.spin(forward, motorPower, pct);
+    #endif
+
+  #else 
+    #ifdef CHASSIS_4_MOTOR_INLINE
+      FrontRight.spin(forward, DriveR_Power, pct);
+      FrontLeft.spin(reverse, DriveL_Power, pct);
+      BackRight.spin(forward, DriveR_Power, pct);
+      BackLeft.spin(reverse, DriveL_Power, pct);
+
+    #elif defined CHASSIS_2_MOTOR_INLINE
+      DriveRight.spin(reverse, DriveR_Power, pct);
+      DriveLeft.spin(forward, DriveL_Power, pct);
+    #endif
   #endif
 
-    wait(10, msec);
-  }
+  wait(10, msec);
+
+ // #if defined GYRO
+ // }while(fabs(rotatePID.avgError) > 0.8);
+ // #elif !defined GYRO
+  }while(fabs(rotateR_PID.avgError) > 0.8);// || fabs(rotateL_PID.avgError) > 0.8);
+ // #endif
+  //end do-while
 
 #elif !defined(PID) && !defined(GYRO)
   #ifdef CHASSIS_4_MOTOR_INLINE
