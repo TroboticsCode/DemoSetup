@@ -155,15 +155,15 @@ void moveRotate(int16_t degrees, int velocity)
     pidStruct_t rotateR_PID;
     pidStruct_t rotateL_PID;
 
-    pidInit(&rotateR_PID, 2, 0, 0.57, 8, 10);
-    pidInit(&rotateL_PID, 2, 0, 0.57, 8, 10);
+    pidInit(&rotateR_PID, 100, 0, 10, 15, 10);
+    pidInit(&rotateL_PID, 100, 0, 10, 15, 10);
 
     float DriveR_Power = 0;
     float DriveL_Power = 0;
 
   #elif defined GYRO
     pidStruct_t rotatePID;
-    pidInit(&rotatePID, 2, 0, 0.57, 8, 10);
+    pidInit(&rotatePID, 2, 0, 0.8, 30, 10);
 
     float motorPower = 0;
   #endif
@@ -171,21 +171,19 @@ void moveRotate(int16_t degrees, int velocity)
   do
   {
   #if defined (GYRO)
-    printPIDValues(&rotatePID);
     motorPower = (velocity/100.0f) * pidCalculate(&rotatePID, degrees, myGyro.rotation(rotationUnits::deg));
   #elif !defined (GYRO)
-    printPIDValues(&rotateR_PID);
-
     #ifdef CHASSIS_4_MOTOR_INLINE
       DriveL_Power = (velocity/100.0f) * pidCalculate(&rotateL_PID, rotations, BackLeft.rotation(rev));
       DriveR_Power = (velocity/100.0f) * pidCalculate(&rotateR_PID, rotations, BackRight.rotation(rev));
     #elif defined CHASSIS_2_MOTOR_INLINE
-      DriveL_Power = (velocity/100.0f) * pidCalculate(&rotateL_PID, (-1 * rotations), (-1 * DriveLeft.rotation(rev)));
-      DriveR_Power = (velocity/100.0f) * pidCalculate(&rotateR_PID, rotations, DriveRight.rotation(rev));
+      DriveL_Power = (velocity/100.0f) * pidCalculate(&rotateL_PID, rotations, DriveLeft.rotation(rev));
+      DriveR_Power = (velocity/100.0f) * pidCalculate(&rotateR_PID, rotations, -1.0f * DriveRight.rotation(rev));
     #endif
   #endif
 
   #if defined (GYRO)
+    printPIDValues(&rotatePID);
     #ifdef CHASSIS_4_MOTOR_INLINE
       FrontRight.spin(forward, motorPower, pct);
       FrontLeft.spin(reverse, motorPower, pct);
@@ -198,6 +196,7 @@ void moveRotate(int16_t degrees, int velocity)
     #endif
 
   #else 
+    printPIDValues(&rotateR_PID);
     #ifdef CHASSIS_4_MOTOR_INLINE
       FrontRight.spin(forward, DriveR_Power, pct);
       FrontLeft.spin(reverse, DriveL_Power, pct);
@@ -212,11 +211,11 @@ void moveRotate(int16_t degrees, int velocity)
 
   wait(10, msec);
 
- // #if defined GYRO
- // }while(fabs(rotatePID.avgError) > 0.8);
- // #elif !defined GYRO
-  }while(fabs(rotateR_PID.avgError) > 0.8);// || fabs(rotateL_PID.avgError) > 0.8);
- // #endif
+  #if defined GYRO
+  }while(fabs(rotatePID.avgError) > 0.8); //error in degrees
+  #elif !defined GYRO
+  }while(fabs(rotateR_PID.avgError) > 0.05 || fabs(rotateL_PID.avgError) > 0.5); //error in units of revs
+  #endif
   //end do-while
 
 #elif !defined(PID) && !defined(GYRO)
