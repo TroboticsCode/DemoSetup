@@ -12,6 +12,7 @@
 using namespace vex;
 
 #include <math.h>
+#include "vex_thread.h"
 #include "PID.h"
 
 //function declarations
