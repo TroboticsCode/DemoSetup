@@ -1,9 +1,13 @@
-/*  PID.h
+/********************************************************* 
+*    PID.h
 * This file is to be used with PID.cpp
 * This is a C implementation of closed loop control
 * An instance of it may be created to control any motor
 * or drive command
-*/
+********************************************************/
+#ifndef PID_H
+#define PID_H
+
 #include "vex.h"
 #include <math.h>
 #include <stdlib.h>
@@ -35,3 +39,5 @@ typedef struct
 void pidInit(pidStruct_t* pid, double kP, double kI, double kD, double slewRate, int minDt);
 double pidCalculate(pidStruct_t* pid, double target, double current);
 void printPIDValues(pidStruct_t *pid);
+
+#endif

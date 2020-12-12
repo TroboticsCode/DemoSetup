@@ -19,6 +19,7 @@ using namespace vex;
 void moveLinear(float distance, int velocity);
 void moveRotate(int16_t degrees, int velocity);
 void moveStop(void);
+void userDrive(void);
 
 //this is where all the config variables for a robot are located. Change them to match your robot
 //these variables are used in DriveFunctions.cpp
@@ -54,6 +55,21 @@ void moveStop(void);
 
   #define DriveLeftPort     PORT1
   #define DriveRightPort    PORT2
+#endif
+
+/*    Control Scheme
+ * Define your control scheme and joystick
+ *  axes here
+ */
+ #define ARCADE_CONTROL
+ //#define TANK_CONTROL
+
+#ifdef ARCADE_CONTROL
+  #define HORIZONTALAXIS Axis1
+  #define VERTICALAXIS Axis2
+#elif def TANK_CONTROL
+  #define LEFTAXIS Axis3
+  #define RIGHTAXIS Axis2
 #endif
 
 /*    Chassis Dimensions

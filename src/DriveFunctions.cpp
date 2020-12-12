@@ -8,10 +8,10 @@
 using namespace vex;
 
 #ifdef CHASSIS_4_MOTOR_INLINE
-  motor FrontLeft = motor(FrontLeftPort, GEAR_SET, true);
-  motor BackLeft = motor(BackLeftPort, GEAR_SET, true);
-  motor FrontRight = motor(FrontRightPort, GEAR_SET, false);
-  motor BackRight = motor(BackRightPort, GEAR_SET, false);
+  motor FrontLeft = motor(FrontLeftPort, GEAR_SET, false);
+  motor BackLeft = motor(BackLeftPort, GEAR_SET, false);
+  motor FrontRight = motor(FrontRightPort, GEAR_SET, true);
+  motor BackRight = motor(BackRightPort, GEAR_SET, true);
 
 #elif defined(CHASSIS_2_MOTOR_INLINE)
   motor DriveLeft = motor(DriveLeftPort, GEAR_SET, false);
@@ -25,6 +25,41 @@ using namespace vex;
   inertial myGyro = inertial(GYRO_PORT);
 #endif
 
+////////////////User Drive Functions/////////////////////////
+void userDrive(void)
+{
+#ifdef ARCADE_CONTROL
+  int32_t horizontalAxis = Controller1.HORIZONTALAXIS.value();
+  int32_t verticalAxis = Controller1.VERTICALAXIS.value();
+  
+  #ifdef CHASSIS_2_MOTOR_INLINE
+    DriveRight.spin(directionType::fwd, (verticalAxis - horizontalAxis), velocityUnits::pct);
+    DriveLeft.spin(directionType::fwd, (verticalAxis + horizontalAxis), velocityUnits::pct);
+  
+  #elif defined CHASSIS_4_MOTOR_INLINE
+    BackRight.spin(directionType::fwd, (verticalAxis - horizontalAxis), velocityUnits::pct);
+    BackLeft.spin(directionType::fwd, (verticalAxis + horizontalAxis), velocityUnits::pct);
+    FrontRight.spin(directionType::fwd, (verticalAxis - horizontalAxis), velocityUnits::pct);
+    FrontLeft.spin(directionType::fwd, (verticalAxis + horizontalAxis), velocityUnits::pct);
+  #endif
+
+#elif defined TANK_CONTROL
+  int32_t leftAxis = Controller1.LEFTAXIS.value();
+  int32_t rightAxis = Controller1.RIGHTAXIS.value();
+  #ifdef CHASSIS_2_MOTOR_INLINE
+    DriveLeft.spin(directionType::fwd, leftAxis, velocityUnits::pct);
+    DriveRight.spin(directionType::fwd, rightAxis, velocityUnits::pct);
+  
+  #elif defined CHASSIS_4_MOTOR_INLINE
+    BackLeft.spin(directionType::fwd, leftAxis, velocityUnits::pct);
+    BackRight.spin(directionType::fwd, rightAxis, velocityUnits::pct);
+    FrontLeft.spin(directionType::fwd, leftAxis, velocityUnits::pct);
+    FrontRight.spin(directionType::fwd, rightAxis, velocityUnits::pct);
+  #endif
+#endif
+}
+
+////////////////Auton Drive Functions////////////////////////
 /**************************************************
  * @brief: moves the robot forward or back
  *    at a given speed
@@ -75,7 +110,7 @@ void moveLinear(float distance, int velocity)
 
     #elif defined (CHASSIS_4_MOTOR_INLINE)
       DriveR_Power = (velocity/100.0f) * pidCalculate(&driveR_PID, rotations, BackRight.rotation(rev));
-      DriveL_Power = (velocity/100.0f) * pidCalculate(&driveL_PID, rotations, BackeLeft.rotation(rev));
+      DriveL_Power = (velocity/100.0f) * pidCalculate(&driveL_PID, rotations, BackLeft.rotation(rev));
 
       FrontRight.spin(forward, DriveR_Power, pct);
       FrontLeft.spin(forward, DriveL_Power, pct);

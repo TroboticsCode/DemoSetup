@@ -87,10 +87,9 @@ void usercontrol(void) {
     ClawMotor.spin(reverse);
     Controller1.ButtonY.pressed(autonomous);
 
-    #ifdef CHASSIS_2_MOTOR_INLINE
-      DriveRight.spin(directionType::fwd, (Controller1.Axis2.value() - Controller1.Axis1.value()), velocityUnits::pct);
-      DriveLeft.spin(directionType::fwd, (Controller1.Axis2.value() + Controller1.Axis1.value()), velocityUnits::pct);
-    #endif
+    //leave the drive code here, it should work if you set up 
+    // DriveFunctionsConfig.h properly
+    userDrive();
 
     if (Controller1.ButtonA.pressing())
     {
