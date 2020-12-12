@@ -10,6 +10,7 @@ extern brain Brain;
 extern controller Controller1;
 extern motor ClawMotor;
 extern motor Tester1;
+extern motor Tester2;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Text.

@@ -94,15 +94,18 @@ void usercontrol(void) {
     if (Controller1.ButtonA.pressing())
     {
       Tester1.spin(forward);
+      Tester2.spin(forward);
     }
 
     else if (Controller1.ButtonB.pressing())
     {
       Tester1.spin(reverse);
+      Tester2.spin(reverse);
     }
     else
     {
       Tester1.stop();
+      Tester2.stop();
     }
 
     Controller1.ButtonX.pressed(testPID);
