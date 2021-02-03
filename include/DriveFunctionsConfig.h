@@ -119,6 +119,12 @@ void userDrive(void);
 #define PID
 //#define GYRO
 
+//functions for setting PID gains in the auton routines
+#ifdef PID
+  void setLinGains(double kP, double kI, double kD, double slewRate, int minDT);
+  void setRotGains(double kP, double kI, double kD, double slewRate, int minDT);
+#endif
+
 #ifdef GYRO
   extern inertial myGyro;
   #define GYRO_PORT PORT5

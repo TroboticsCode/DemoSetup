@@ -3,6 +3,14 @@
 
 using namespace vex;
 
+/*
+* @brief: Init/ update funcion to start a PID controller
+* @param[in] kP: Proportional gain
+* @param[in] kI: Integral gain
+* @param[in] kD: Derivative gain
+* @param[in] slewRate: max change to the output value for any given calculation iteration
+* @param[in] minDt: minimum time between calculation iterations in mS. 
+*/
 void pidInit(pidStruct_t* pid, double kP, double kI, double kD, double slewRate, int minDt)
 {
   pid->kP = kP;
@@ -47,6 +55,7 @@ double pidCalculate(pidStruct_t *pid, double target, double current)
   if(pid->numIterations > SAMPLES_AVG) //array has been filled, calculate average
   {
     //make room for the next sample
+    //@TODO: make cyclical with mod space
     for(int i = 0; i < (SAMPLES_AVG-1); i++)
     {
       pid->errorSamples[i] = pid->errorSamples[i+1];
