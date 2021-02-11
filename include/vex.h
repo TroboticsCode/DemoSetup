@@ -20,6 +20,7 @@
 #include "v5_vcs.h"
 
 #include "robot-config.h"
+#include "VisionSensor.h"
 
 //include "testingAuton1.cpp"
 

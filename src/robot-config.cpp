@@ -9,6 +9,7 @@ brain  Brain;
 
 // VEXcode device constructors
 controller Controller1 = controller(primary);
+vision VisionSensor = vision(PORT1);
 motor ClawMotor = motor(PORT3, ratio18_1, false);
 motor Tester1 = motor(PORT17, ratio36_1, true);
 motor Tester2 = motor(PORT18, ratio36_1, true);
