@@ -15,13 +15,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-
 #include "v5.h"
 #include "v5_vcs.h"
 
 #include "robot-config.h"
-#include "VisionSensor.h"
-
 //include "testingAuton1.cpp"
 
 #define waitUntil(condition)                                                   \

@@ -11,12 +11,14 @@
 /*    Description:  Trobotics Template File                                   */
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
-
+#define CENTER_X 316/2.0f
+#define CENTER_Y 212/2.0f
 
 #include "vex.h"
 #include "Autons.h"
 #include "Functions.h"
 #include "DriveFunctionsConfig.h"
+#include "VisionSensor.h"
 
 using namespace vex;
 
@@ -77,38 +79,58 @@ void autonomous(void)
 
 void usercontrol(void) { 
   //add local user control variables here:
-  int power;
+  int32_t numObjects;
+  Brain.Screen.clearScreen();
+  Brain.Screen.print("user code running");
+  Brain.Screen.newLine();
   
   //User control code here, inside the loop:
   //remove existing demo code and replace with you own! Then remove this comment
   while (1) {
-    power = Controller1.Axis1.position(percent)+Controller1.Axis2.position(percent);
-    ClawMotor.setVelocity(power, pct);
-    ClawMotor.spin(reverse);
-    Controller1.ButtonY.pressed(autonomous);
+    numObjects = Vision1.takeSnapshot(RED_BALL);
+        
+    Brain.Screen.setCursor(2,1);
+    Brain.Screen.print("centerX: %d\n", Vision1.largestObject.centerX);
+    Brain.Screen.newLine();
+    Brain.Screen.print("centerY: %d", Vision1.largestObject.centerY);
+    Brain.Screen.newLine();
+    Brain.Screen.clearLine();
 
-    //leave the drive code here, it should work if you set up 
-    // DriveFunctionsConfig.h properly
-    userDrive();
-
-    if (Controller1.ButtonA.pressing())
+    if(Vision1.largestObject.exists)
     {
-      Tester1.spin(forward);
-      Tester2.spin(forward);
-    }
-
-    else if (Controller1.ButtonB.pressing())
-    {
-      Tester1.spin(reverse);
-      Tester2.spin(reverse);
+      if(Vision1.largestObject.centerX > (CENTER_X + 20))
+      {
+        Brain.Screen.print("turn right");
+        BackRight.spin(directionType::rev, 20, velocityUnits::pct);
+        BackLeft.spin(directionType::fwd, 20, velocityUnits::pct);
+        FrontRight.spin(directionType::rev, 20, velocityUnits::pct);
+        FrontLeft.spin(directionType::fwd, 20, velocityUnits::pct);
+      }
+      else if(Vision1.largestObject.centerX < (CENTER_X - 20))
+      {
+        Brain.Screen.print("turn left ");
+        BackRight.spin(directionType::fwd, 20, velocityUnits::pct);
+        BackLeft.spin(directionType::rev, 20, velocityUnits::pct);
+        FrontRight.spin(directionType::fwd, 20, velocityUnits::pct);
+        FrontLeft.spin(directionType::rev, 20, velocityUnits::pct);        
+      }
+      else
+      {
+        Brain.Screen.print("Dont move");
+        BackRight.stop();
+        BackLeft.stop();
+        FrontRight.stop();
+        FrontLeft.stop();
+      }
     }
     else
     {
-      Tester1.stop();
-      Tester2.stop();
+      Brain.Screen.print("nothing detected");
+      BackRight.stop();
+      BackLeft.stop();
+      FrontRight.stop();
+      FrontLeft.stop();
     }
-
-    Controller1.ButtonX.pressed(testPID);
 
     wait(20, msec); // Sleep the task for a short amount of time to
   }
