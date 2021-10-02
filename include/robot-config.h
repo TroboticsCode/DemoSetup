@@ -8,8 +8,9 @@ extern brain Brain;
 // VEXcode devices - declare new devices here, set them up
 // in robot-config.cpp
 extern controller Controller1;
-extern motor ClawMotor;
-extern motor Tester1;
+extern motor winch;
+extern motor arm;
+
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Text.

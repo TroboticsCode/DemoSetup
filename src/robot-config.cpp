@@ -1,4 +1,5 @@
 #include "vex.h"
+#include "DriveFunctionsConfig.h"
 
 using namespace vex;
 using signature = vision::signature;
@@ -9,8 +10,8 @@ brain  Brain;
 
 // VEXcode device constructors
 controller Controller1 = controller(primary);
-motor ClawMotor = motor(PORT3, ratio18_1, false);
-motor Tester1 = motor(PORT17, ratio36_1, true);
+motor arm = motor(PORT17, GREEN, true);
+motor winch = motor(PORT11, GREEN, false);
 
 // VEXcode generated functions
 
