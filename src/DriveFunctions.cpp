@@ -158,17 +158,17 @@ void moveLinear(float distance, int velocity, uint32_t timeOut)
 }
 
 
-void moveStop(void)
+void moveStop(brakeType brake_type)
 {
 #ifdef CHASSIS_4_MOTOR_INLINE
-  FrontLeft.stop(brakeType::hold);
-  BackLeft.stop(brakeType::hold);
-  FrontRight.stop(brakeType::hold);
-  BackRight.stop(brakeType::hold);
+  FrontLeft.stop(brake_type);
+  BackLeft.stop(brake_type);
+  FrontRight.stop(brake_type);
+  BackRight.stop(brake_type);
 
 #elif defined(CHASSIS_2_MOTOR_INLINE)
-  DriveRight.stop(brakeType::hold);
-  DriveLeft.stop(brakeType::hold);
+  DriveRight.stop(brake_type);
+  DriveLeft.stop(brake_type);
 #endif
 }
 

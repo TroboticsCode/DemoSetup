@@ -18,7 +18,7 @@ using namespace vex;
 //function declarations
 void moveLinear(float distance, int velocity, uint32_t timeOut);
 void moveRotate(int16_t degrees, int velocity, uint32_t timeOut);
-void moveStop(void);
+void moveStop(brakeType brake_type);
 void userDrive(void);
 
 //this is where all the config variables for a robot are located. Change them to match your robot
@@ -44,10 +44,10 @@ void userDrive(void);
   extern motor BackLeft;
   extern motor BackRight;
 
-  #define FrontLeftPort     PORT10
+  #define FrontLeftPort     PORT8
   #define FrontRightPort    PORT20
-  #define BackLeftPort      PORT1
-  #define BackRightPort     PORT5
+  #define BackLeftPort      PORT7
+  #define BackRightPort     PORT19
 
 #elif defined(CHASSIS_2_MOTOR_INLINE)
   extern motor DriveLeft;
@@ -77,8 +77,8 @@ void userDrive(void);
  * (from wheel center to wheel center) of 
  * your chassis here in inches
  */
- #define CHASSIS_WIDTH    12.00f
- #define CHASSIS_LENGTH   9.00f
+ #define CHASSIS_WIDTH    12.25f
+ #define CHASSIS_LENGTH   9.4f
 
 #define HYPOTENUSE sqrt(pow(CHASSIS_WIDTH,2) + pow(CHASSIS_LENGTH,2))
 #define RADIUS  HYPOTENUSE/2.0f
@@ -116,7 +116,7 @@ void userDrive(void);
 //#define GEAR_SET    BLUE
 #define GEAR_SET    GREEN
 
-#define PID
+//#define PID
 //#define GYRO
 
 #ifdef PID
