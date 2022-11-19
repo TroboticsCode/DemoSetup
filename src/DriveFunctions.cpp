@@ -18,7 +18,10 @@ using namespace vex;
   motor DriveRight = motor(DriveRightPort, GEAR_SET, true);
 
 #elif defined(CHASSIS_X_DRIVE)
-  //coming soon!
+  motor FrontLeft = motor(FrontLeftPort, GEAR_SET, false);
+  motor BackLeft = motor(BackLeftPort, GEAR_SET, false);
+  motor FrontRight = motor(FrontRightPort, GEAR_SET, true);
+  motor BackRight = motor(BackRightPort, GEAR_SET, true);
 #endif
 
 #ifdef GYRO
@@ -36,8 +39,8 @@ void userDrive(void)
     DriveRight.setBrake(brakeType::coast);
     DriveLeft.setBrake(brakeType::coast);
 
-    DriveRight.spin(directionType::fwd, (verticalAxis - horizontalAxis), velocityUnits::pct);
-    DriveLeft.spin(directionType::fwd, (verticalAxis + horizontalAxis), velocityUnits::pct);
+    DriveRight.spin(directionType::fwd, (verticalAxis - horizontalAxis), velocityUnits::80pct);
+    DriveLeft.spin(directionType::fwd, (verticalAxis + horizontalAxis), velocityUnits::80pct);
   
   #elif defined CHASSIS_4_MOTOR_INLINE
     BackRight.setBrake(brakeType::coast);
@@ -55,15 +58,31 @@ void userDrive(void)
   int32_t leftAxis = Controller1.LEFTAXIS.value();
   int32_t rightAxis = Controller1.RIGHTAXIS.value();
   #ifdef CHASSIS_2_MOTOR_INLINE
-    DriveLeft.spin(directionType::fwd, leftAxis, velocityUnits::pct);
-    DriveRight.spin(directionType::fwd, rightAxis, velocityUnits::pct);
+    DriveLeft.spin(directionType::fwd, leftAxis, velocityUnits::80pct);
+    DriveRight.spin(directionType::fwd, rightAxis, velocityUnits::80pct);
   
   #elif defined CHASSIS_4_MOTOR_INLINE
-    BackLeft.spin(directionType::fwd, leftAxis, velocityUnits::pct);
-    BackRight.spin(directionType::fwd, rightAxis, velocityUnits::pct);
-    FrontLeft.spin(directionType::fwd, leftAxis, velocityUnits::pct);
-    FrontRight.spin(directionType::fwd, rightAxis, velocityUnits::pct);
+    BackLeft.spin(directionType::fwd, leftAxis, velocityUnits::80pct);
+    BackRight.spin(directionType::fwd, rightAxis, velocityUnits::80pct);
+    FrontLeft.spin(directionType::fwd, leftAxis, velocityUnits::80pct);
+    FrontRight.spin(directionType::fwd, rightAxis, velocityUnits::80pct);
   #endif
+
+#elif defined CHASSIS_X_DRIVE
+  int32_t horizontalAxis = Controller1.HORIZONTALAXIS.value()/2;
+  int32_t verticalAxis = Controller1.VERTICALAXIS.value()/2;
+  int32_t rotateAxis = Controller1.ROTATIONAXIS.value()/2;
+
+    BackRight.setBrake(brakeType::coast);
+    FrontRight.setBrake(brakeType::coast);
+    BackLeft.setBrake(brakeType::coast);
+    FrontLeft.setBrake(brakeType::coast);
+
+    BackRight.spin(directionType::fwd, (verticalAxis + horizontalAxis - rotateAxis), velocityUnits::pct);
+    BackLeft.spin(directionType::fwd, (verticalAxis - horizontalAxis + rotateAxis), velocityUnits::pct);
+    FrontRight.spin(directionType::fwd, (verticalAxis - horizontalAxis - rotateAxis), velocityUnits::pct);
+    FrontLeft.spin(directionType::fwd, (verticalAxis + horizontalAxis + rotateAxis), velocityUnits::pct);
+
 #endif
 }
 
@@ -85,6 +104,16 @@ static int    lin_minDT = 10;
 void moveLinear(float distance, int velocity, uint32_t timeOut)
 {
   float rotations = distance * (1/((float)ROTATION_FACTOR));
+
+  /*
+   * X drive angles wheels at 45deg so 
+   *  the robot will move further per rotation
+   *  by a factor of square root of 2 => 1.414
+   */
+  #ifdef CHASSIS_X_DRIVE
+    rotations /= sqrt(2);
+  #endif
+
   Brain.Screen.print("Rotations to turn: %f", rotations);
   Brain.Screen.newLine();
   Brain.Screen.print("Rotation Factor: %f", ROTATION_FACTOR);
