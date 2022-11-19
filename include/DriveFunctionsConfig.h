@@ -61,7 +61,7 @@ void userDrive(void);
  * Define your control scheme and joystick
  *  axes here
  */
- #ifndef CHASSIS_X_DRIVE
+#ifndef CHASSIS_X_DRIVE
  #define ARCADE_CONTROL
  //#define TANK_CONTROL
 #endif
@@ -76,6 +76,10 @@ void userDrive(void);
   #define HORIZONTALAXIS Axis4
   #define VERTICALAXIS Axis3
   #define ROTATIONAXIS Axis1
+
+  //edit this number to make 
+  //driving straight easier
+  #define DEADZONE 10 
 #endif
 
 /*    Chassis Dimensions

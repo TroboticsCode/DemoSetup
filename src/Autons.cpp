@@ -7,8 +7,8 @@
 
 void Auton1()
 {
-  setRotGains(0, 0, 0, 20, 10); //update PID gains to tune robot
-  setLinGains(0, 0, 0, 20, 10);
+  //setRotGains(0, 0, 0, 20, 10); //update PID gains to tune robot
+  //setLinGains(0, 0, 0, 20, 10);
 
   moveLinear(24, 100, 10000);
 }

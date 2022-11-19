@@ -7,7 +7,7 @@
 #include "DriveFunctionsConfig.h"
 using namespace vex;
 
-#ifdef CHASSIS_4_MOTOR_INLINE
+#if defined CHASSIS_4_MOTOR_INLINE || defined CHASSIS_X_DRIVE
   motor FrontLeft = motor(FrontLeftPort, GEAR_SET, false);
   motor BackLeft = motor(BackLeftPort, GEAR_SET, false);
   motor FrontRight = motor(FrontRightPort, GEAR_SET, true);
@@ -16,12 +16,6 @@ using namespace vex;
 #elif defined(CHASSIS_2_MOTOR_INLINE)
   motor DriveLeft = motor(DriveLeftPort, GEAR_SET, false);
   motor DriveRight = motor(DriveRightPort, GEAR_SET, true);
-
-#elif defined(CHASSIS_X_DRIVE)
-  motor FrontLeft = motor(FrontLeftPort, GEAR_SET, false);
-  motor BackLeft = motor(BackLeftPort, GEAR_SET, false);
-  motor FrontRight = motor(FrontRightPort, GEAR_SET, true);
-  motor BackRight = motor(BackRightPort, GEAR_SET, true);
 #endif
 
 #ifdef GYRO
@@ -39,8 +33,8 @@ void userDrive(void)
     DriveRight.setBrake(brakeType::coast);
     DriveLeft.setBrake(brakeType::coast);
 
-    DriveRight.spin(directionType::fwd, (verticalAxis - horizontalAxis), velocityUnits::80pct);
-    DriveLeft.spin(directionType::fwd, (verticalAxis + horizontalAxis), velocityUnits::80pct);
+    DriveRight.spin(directionType::fwd, (verticalAxis - horizontalAxis), velocityUnits::pct);
+    DriveLeft.spin(directionType::fwd, (verticalAxis + horizontalAxis), velocityUnits::pct);
   
   #elif defined CHASSIS_4_MOTOR_INLINE
     BackRight.setBrake(brakeType::coast);
@@ -58,20 +52,27 @@ void userDrive(void)
   int32_t leftAxis = Controller1.LEFTAXIS.value();
   int32_t rightAxis = Controller1.RIGHTAXIS.value();
   #ifdef CHASSIS_2_MOTOR_INLINE
-    DriveLeft.spin(directionType::fwd, leftAxis, velocityUnits::80pct);
-    DriveRight.spin(directionType::fwd, rightAxis, velocityUnits::80pct);
+    DriveLeft.spin(directionType::fwd, leftAxis, velocityUnits::pct);
+    DriveRight.spin(directionType::fwd, rightAxis, velocityUnits::pct);
   
   #elif defined CHASSIS_4_MOTOR_INLINE
-    BackLeft.spin(directionType::fwd, leftAxis, velocityUnits::80pct);
-    BackRight.spin(directionType::fwd, rightAxis, velocityUnits::80pct);
-    FrontLeft.spin(directionType::fwd, leftAxis, velocityUnits::80pct);
-    FrontRight.spin(directionType::fwd, rightAxis, velocityUnits::80pct);
+    BackLeft.spin(directionType::fwd, leftAxis, velocityUnits::pct);
+    BackRight.spin(directionType::fwd, rightAxis, velocityUnits::pct);
+    FrontLeft.spin(directionType::fwd, leftAxis, velocityUnits::pct);
+    FrontRight.spin(directionType::fwd, rightAxis, velocityUnits::pct);
   #endif
 
 #elif defined CHASSIS_X_DRIVE
   int32_t horizontalAxis = Controller1.HORIZONTALAXIS.value()/2;
   int32_t verticalAxis = Controller1.VERTICALAXIS.value()/2;
   int32_t rotateAxis = Controller1.ROTATIONAXIS.value()/2;
+
+  if(abs(horizontalAxis) < DEADZONE)
+    horizontalAxis = 0;
+  if(abs(verticalAxis) < DEADZONE)
+    verticalAxis = 0;
+  if(abs(rotateAxis) < DEADZONE)
+    rotateAxis = 0;
 
     BackRight.setBrake(brakeType::coast);
     FrontRight.setBrake(brakeType::coast);
