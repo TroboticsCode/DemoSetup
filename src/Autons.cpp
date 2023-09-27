@@ -3,6 +3,7 @@
 #include "Functions.h"
 #include "DriveFunctionsConfig.h"
 
+autonsTuple autons[] = {{"AUTON_1", (int*)Auton1}};
 //Put your auton routines in here
 
 void Auton1()

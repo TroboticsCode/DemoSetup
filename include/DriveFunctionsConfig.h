@@ -10,7 +10,9 @@
 
 #include "vex.h"
 using namespace vex;
+using namespace std;
 
+#include <vector>
 #include <math.h>
 #include "vex_thread.h"
 #include "PID.h"
@@ -31,6 +33,9 @@ void userDrive(void);
 //#define CHASSIS_4_MOTOR_INLINE
 //#define CHASSIS_2_MOTOR_INLINE
 #define CHASSIS_X_DRIVE
+//vector<motor>leftDriveMotors;
+//vector<motor>rightDriveMotors;
+
 
 /*    Drive Motor Ports
  * Enter the ports used for 
