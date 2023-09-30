@@ -47,23 +47,7 @@ void pre_auton(void)
 
 void autonomous(void) 
 {
- switch (state)
-  {
-    case NONE:
-    break;
-
-    case AutonR:    
-      Auton1();
-    break;
-
-    case AutonB:
-  
-    break;
-          
-    // Default = NO autonomous
-    default:
-    break;
-  }
+  auton_runner();
 }
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
