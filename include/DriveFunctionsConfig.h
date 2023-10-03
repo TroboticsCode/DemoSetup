@@ -12,7 +12,6 @@
 using namespace vex;
 using namespace std;
 
-#include <vector>
 #include <math.h>
 #include "vex_thread.h"
 #include "PID.h"
@@ -22,6 +21,7 @@ void moveLinear(float distance, int velocity, uint32_t timeOut);
 void moveRotate(int16_t degrees, int velocity, uint32_t timeOut);
 void moveStop(brakeType brake_type);
 void userDrive(void);
+void initDriveMotors();
 
 //this is where all the config variables for a robot are located. Change them to match your robot
 //these variables are used in DriveFunctions.cpp
@@ -30,12 +30,8 @@ void userDrive(void);
  * uncomment the chassis type here
  * x drive assumes 4 drive motors
  */
-//#define CHASSIS_4_MOTOR_INLINE
-//#define CHASSIS_2_MOTOR_INLINE
-#define CHASSIS_X_DRIVE
-//vector<motor>leftDriveMotors;
-//vector<motor>rightDriveMotors;
-
+//#define CHASSIS_X_DRIVE
+#define CASSIS_INLINE_DRIVE
 
 /*    Drive Motor Ports
  * Enter the ports used for 
@@ -43,24 +39,11 @@ void userDrive(void);
  * Perspective is from rear of robot
  *  looking forward
  */
-#if defined CHASSIS_4_MOTOR_INLINE || defined CHASSIS_X_DRIVE
-  extern motor FrontLeft;
-  extern motor FrontRight;
-  extern motor BackLeft;
-  extern motor BackRight;
+//update drive motor ports here
+static int32_t leftDrivePorts[] = {PORT1, PORT2, PORT3};
+static int32_t rightDrivePorts[] = {PORT4, PORT5, PORT6};
 
-  #define FrontLeftPort     PORT20
-  #define FrontRightPort    PORT15
-  #define BackLeftPort      PORT8
-  #define BackRightPort     PORT1
-
-#elif defined(CHASSIS_2_MOTOR_INLINE)
-  extern motor DriveLeft;
-  extern motor DriveRight;
-
-  #define DriveLeftPort     PORT6
-  #define DriveRightPort    PORT8
-#endif
+static const uint8_t numDriveMotors = sizeof(leftDrivePorts)/sizeof(int32_t);
 
 /*    Control Scheme
  * Define your control scheme and joystick

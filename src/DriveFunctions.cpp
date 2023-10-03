@@ -7,61 +7,46 @@
 #include "DriveFunctionsConfig.h"
 using namespace vex;
 
-#if defined CHASSIS_4_MOTOR_INLINE || defined CHASSIS_X_DRIVE
-  motor FrontLeft = motor(FrontLeftPort, GEAR_SET, false);
-  motor BackLeft = motor(BackLeftPort, GEAR_SET, false);
-  motor FrontRight = motor(FrontRightPort, GEAR_SET, true);
-  motor BackRight = motor(BackRightPort, GEAR_SET, true);
+void updateDriveMotors(int leftDriveVal, int rightDriveVal);
+void updateDriveMotorVolts(int leftVoltage, int rightVoltage);
+void setDriveBrake(brakeType brake_type);
 
-#elif defined(CHASSIS_2_MOTOR_INLINE)
-  motor DriveLeft = motor(DriveLeftPort, GEAR_SET, false);
-  motor DriveRight = motor(DriveRightPort, GEAR_SET, true);
-#endif
+vector<motor> leftDriveMotors;
+vector<motor> rightDriveMotors;
+
+void initDriveMotors()
+{
+  setDriveBrake(brakeType::coast);
+
+  for(uint8_t i = 0; i < numDriveMotors; i++)
+  {
+    leftDriveMotors.push_back(motor(leftDrivePorts[i], GEAR_SET, false));
+    rightDriveMotors.push_back(motor(rightDrivePorts[i], GEAR_SET, true));
+  }
 
 #ifdef GYRO
   inertial myGyro = inertial(GYRO_PORT);
 #endif
+}
 
 ////////////////User Drive Functions/////////////////////////
 void userDrive(void)
 {
-#ifdef ARCADE_CONTROL
-  int32_t horizontalAxis = Controller1.HORIZONTALAXIS.value()/2;
-  int32_t verticalAxis = Controller1.VERTICALAXIS.value()/2;
-  
-  #ifdef CHASSIS_2_MOTOR_INLINE
-    DriveRight.setBrake(brakeType::coast);
-    DriveLeft.setBrake(brakeType::coast);
+  setDriveBrake(coast);
 
-    DriveRight.spin(directionType::fwd, (verticalAxis - horizontalAxis), velocityUnits::pct);
-    DriveLeft.spin(directionType::fwd, (verticalAxis + horizontalAxis), velocityUnits::pct);
-  
-  #elif defined CHASSIS_4_MOTOR_INLINE
-    BackRight.setBrake(brakeType::coast);
-    FrontRight.setBrake(brakeType::coast);
-    BackLeft.setBrake(brakeType::coast);
-    FrontLeft.setBrake(brakeType::coast);
+#ifdef CHASSIS_INLINE_DRIVE
+  #ifdef ARCADE_CONTROL
+    int32_t horizontalAxis = Controller1.HORIZONTALAXIS.value()/2;
+    int32_t verticalAxis = Controller1.VERTICALAXIS.value()/2;
+    
+    updateDriveMotors((verticalAxis + horizontalAxis), (verticalAxis - horizontalAxis));
 
-    BackRight.spin(directionType::fwd, (verticalAxis - (horizontalAxis)), velocityUnits::pct);
-    BackLeft.spin(directionType::fwd, (verticalAxis + (horizontalAxis)), velocityUnits::pct);
-    FrontRight.spin(directionType::fwd, (verticalAxis - (horizontalAxis)), velocityUnits::pct);
-    FrontLeft.spin(directionType::fwd, (verticalAxis + (horizontalAxis)), velocityUnits::pct);
+  #elif defined TANK_CONTROL
+    int32_t leftAxis = Controller1.LEFTAXIS.value();
+    int32_t rightAxis = Controller1.RIGHTAXIS.value();
+
+    updateDriveMotors(leftAxis, rightAxis);
   #endif
-
-#elif defined TANK_CONTROL
-  int32_t leftAxis = Controller1.LEFTAXIS.value();
-  int32_t rightAxis = Controller1.RIGHTAXIS.value();
-  #ifdef CHASSIS_2_MOTOR_INLINE
-    DriveLeft.spin(directionType::fwd, leftAxis, velocityUnits::pct);
-    DriveRight.spin(directionType::fwd, rightAxis, velocityUnits::pct);
-  
-  #elif defined CHASSIS_4_MOTOR_INLINE
-    BackLeft.spin(directionType::fwd, leftAxis, velocityUnits::pct);
-    BackRight.spin(directionType::fwd, rightAxis, velocityUnits::pct);
-    FrontLeft.spin(directionType::fwd, leftAxis, velocityUnits::pct);
-    FrontRight.spin(directionType::fwd, rightAxis, velocityUnits::pct);
-  #endif
-
 #elif defined CHASSIS_X_DRIVE
   int32_t horizontalAxis = Controller1.HORIZONTALAXIS.value()/2;
   int32_t verticalAxis = Controller1.VERTICALAXIS.value()/2;
@@ -74,15 +59,10 @@ void userDrive(void)
   if(abs(rotateAxis) < DEADZONE)
     rotateAxis = 0;
 
-    BackRight.setBrake(brakeType::coast);
-    FrontRight.setBrake(brakeType::coast);
-    BackLeft.setBrake(brakeType::coast);
-    FrontLeft.setBrake(brakeType::coast);
-
-    BackRight.spin(directionType::fwd, (verticalAxis + horizontalAxis - rotateAxis), velocityUnits::pct);
-    BackLeft.spin(directionType::fwd, (verticalAxis - horizontalAxis + rotateAxis), velocityUnits::pct);
-    FrontRight.spin(directionType::fwd, (verticalAxis - horizontalAxis - rotateAxis), velocityUnits::pct);
-    FrontLeft.spin(directionType::fwd, (verticalAxis + horizontalAxis + rotateAxis), velocityUnits::pct);
+    rightDriveMotors[1].spin(directionType::fwd, (verticalAxis + horizontalAxis - rotateAxis), velocityUnits::pct);
+    leftDriveMotors[1].spin(directionType::fwd, (verticalAxis - horizontalAxis + rotateAxis), velocityUnits::pct);
+    rightDriveMotors[0].spin(directionType::fwd, (verticalAxis - horizontalAxis - rotateAxis), velocityUnits::pct);
+    leftDriveMotors[0].spin(directionType::fwd, (verticalAxis + horizontalAxis + rotateAxis), velocityUnits::pct);
 
 #endif
 }
@@ -130,47 +110,26 @@ void moveLinear(float distance, int velocity, uint32_t timeOut)
   pidInit(&driveL_PID, lin_kP, lin_kI, lin_kD, lin_slewRate, lin_minDT);
   pidInit(&driveR_PID, lin_kP, lin_kI, lin_kD, lin_slewRate, lin_minDT);
 
-  #if defined (CHASSIS_2_MOTOR_INLINE)
-    DriveRight.resetRotation();
-    DriveLeft.resetRotation();
-  #elif defined(CHASSIS_4_MOTOR_INLINE)
-    FrontLeft.resetRotation();
-    FrontRight.resetRotation();
-    BackLeft.resetRotation();
-    BackRight.resetRotation();
+  resetDriveRotations();
 
-    double leftRevAvg  = 0;
-    double rightRevAvg = 0;
+  double leftRevAvg  = 0;
+  double rightRevAvg = 0;
 
-    uint64_t startTime = Brain.timer(timeUnits::msec);
-  #endif
+  uint64_t startTime = Brain.timer(timeUnits::msec);
  
   printPIDValues(&driveR_PID);
 
   do
   {
-    #if defined (CHASSIS_2_MOTOR_INLINE)
-      printPIDValues(&driveR_PID);
-      DriveR_Power = (velocity/100.0f) * pidCalculate(&driveR_PID, rotations, DriveRight.rotation(rev) / 100.0);
-      DriveL_Power = (velocity/100.0f) * pidCalculate(&driveL_PID, rotations, DriveLeft.rotation(rev) / 100.0);
+    printPIDValues(&driveR_PID);
 
-      DriveRight.spin(forward, 12 * DriveR_Power, voltageUnits::volt);
-      DriveLeft.spin(forward, 12 * DriveL_Power, voltageUnits::volt);
+    leftRevAvg = getMotorAvgRotations(leftDriveMotors);
+    rightRevAvg = getMotorAvgRotations(rightDriveMotors);
 
-    #elif defined (CHASSIS_4_MOTOR_INLINE)
-      printPIDValues(&driveR_PID);
-
-      leftRevAvg = (BackLeft.rotation(rev) + FrontLeft.rotation(rev)) / 2.0;
-      rightRevAvg = (BackRight.rotation(rev) + FrontRight.rotation(rev)) / 2.0;
-
-      DriveR_Power = (velocity/100.0f) * (pidCalculate(&driveR_PID, rotations, rightRevAvg) / 100.0);
-      DriveL_Power = (velocity/100.0f) * (pidCalculate(&driveL_PID, rotations, leftRevAvg) / 100.0);
-
-      FrontRight.spin(forward, 12 * DriveR_Power, voltageUnits::volt);
-      FrontLeft.spin(forward, 12 * DriveL_Power, voltageUnits::volt);
-      BackLeft.spin(forward, 12 * DriveL_Power, voltageUnits::volt);
-      BackRight.spin(forward, 12 * DriveR_Power, voltageUnits::volt);
-    #endif
+    DriveR_Power = (velocity/100.0f) * (pidCalculate(&driveR_PID, rotations, rightRevAvg) / 100.0);
+    DriveL_Power = (velocity/100.0f) * (pidCalculate(&driveL_PID, rotations, leftRevAvg) / 100.0);
+    
+    updateDriveMotorVolts(DriveL_Power, DriveR_Power);
     
   }while((fabs(driveR_PID.avgError) > 0.03 || fabs(driveL_PID.avgError) > 0.03) && (Brain.timer(timeUnits::msec) - startTime < timeOut));
 
@@ -190,16 +149,8 @@ void moveLinear(float distance, int velocity, uint32_t timeOut)
 
 void moveStop(brakeType brake_type)
 {
-#ifdef CHASSIS_4_MOTOR_INLINE
-  FrontLeft.stop(brake_type);
-  BackLeft.stop(brake_type);
-  FrontRight.stop(brake_type);
-  BackRight.stop(brake_type);
-
-#elif defined(CHASSIS_2_MOTOR_INLINE)
-  DriveRight.stop(brake_type);
-  DriveLeft.stop(brake_type);
-#endif
+  setDriveBrake(brake_type);
+  updateDriveMotors(0, 0);
 }
 
 static double rot_kP = 0;
@@ -331,6 +282,53 @@ void moveRotate(int16_t degrees, int velocity, uint32_t timeOut)
     DriveLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
   #endif
 #endif
+}
+
+void updateDriveMotors(int leftDriveVal, int rightDriveVal)
+{
+  for(uint8_t i = 0; i < numDriveMotors; i++)
+  {
+    leftDriveMotors[i].spin(directionType::fwd, leftDriveVal, percentUnits::pct);
+    rightDriveMotors[i].spin(directionType::fwd, rightDriveVal, percentUnits::pct);
+  }
+}
+
+void updateDriveMotorVolts(int leftVoltage, int rightVoltage)
+{
+  for(uint8_t i = 0; i < numDriveMotors; i++)
+  {
+    leftDriveMotors[i].spin(directionType::fwd, leftVoltage, voltageUnits::volt);
+    rightDriveMotors[i].spin(directionType::fwd, rightVoltage, voltageUnits::volt);
+  }  
+}
+
+void setDriveBrake(brakeType brake_type)
+{
+  for(uint8_t i = 0; i < numDriveMotors; i++)
+  {
+    leftDriveMotors[i].setBrake(brake_type);
+    rightDriveMotors[i].setBrake(brake_type);
+  } 
+}
+
+float getMotorAvgRotations(vector<motor> motorGroup)
+{
+  float averageRotations = 0;
+  for(uint8_t i = 0; i < numDriveMotors; i++)
+  {
+    averageRotations += motorGroup[i].position(rotationUnits::rev);
+  }
+  averageRotations /= numDriveMotors;
+  return averageRotations;
+}
+
+void resetDriveRotations(void)
+{
+for(uint8_t i = 0; i < numDriveMotors; i++)
+  {
+    leftDriveMotors[i].resetPosition();
+    rightDriveMotors[i].resetPosition();
+  }
 }
 
 #if defined(PID)

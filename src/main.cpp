@@ -39,6 +39,7 @@ void pre_auton(void)
 {
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
+  initDriveMotors();
   
   Controller1.ButtonR1.pressed(cycle_autons);
   Brain.Screen.pressed(cycle_autons);
