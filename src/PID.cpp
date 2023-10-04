@@ -23,7 +23,27 @@ double pidCalculate(pidStruct_t *pid, double target, double current)
     return pid->lastOutput;
 
   pid->derivative = (pid->error - pid->lastError)/dT;
-  pid->integral += (pid->error * dT);
+
+  //cap our integral so we dont wind up with the output maxed 
+  //but still allow the value to shrink in magnitude
+  if(fabs(pid->output) >= 100)
+  {
+    if(pid->integral > 0)
+    {
+      if((pid->error * dT) < 0)
+        pid->integral += (pid->error * dT);
+
+    }
+    else if(pid->integral < 0)
+    {
+      if((pid->error * dT) > 0)
+        pid->integral += (pid->error * dT);
+    }
+  }
+  else
+  {
+    pid->integral += (pid->error * dT);
+  }
 
   pid->output = (pid->error * pid->kP) + (pid->integral * pid->kI) + (pid->derivative * pid->kD);
 

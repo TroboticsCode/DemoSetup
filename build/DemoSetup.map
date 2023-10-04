@@ -78,7 +78,7 @@ Discarded input sections
  .ARM.exidx.text._Z7pidInitP11pidStruct_tddddi
                 0x00000000        0x8 build/src/PID.o
  .text._Z12pidCalculateP11pidStruct_tdd
-                0x00000000      0x1d0 build/src/PID.o
+                0x00000000      0x220 build/src/PID.o
  .ARM.exidx.text._Z12pidCalculateP11pidStruct_tdd
                 0x00000000        0x8 build/src/PID.o
  .text._Z14printPIDValuesP11pidStruct_t
