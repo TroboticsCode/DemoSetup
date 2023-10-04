@@ -10,19 +10,21 @@ using namespace vex;
 void updateDriveMotors(int leftDriveVal, int rightDriveVal);
 void updateDriveMotorVolts(int leftVoltage, int rightVoltage);
 void setDriveBrake(brakeType brake_type);
+float getMotorAvgRotations(vector<motor> motorGroup);
+void resetDriveRotations(void);
 
 vector<motor> leftDriveMotors;
 vector<motor> rightDriveMotors;
 
 void initDriveMotors()
 {
-  setDriveBrake(brakeType::coast);
-
   for(uint8_t i = 0; i < numDriveMotors; i++)
   {
     leftDriveMotors.push_back(motor(leftDrivePorts[i], GEAR_SET, false));
     rightDriveMotors.push_back(motor(rightDrivePorts[i], GEAR_SET, true));
   }
+
+  setDriveBrake(brakeType::coast);
 
 #ifdef GYRO
   inertial myGyro = inertial(GYRO_PORT);
@@ -36,8 +38,8 @@ void userDrive(void)
 
 #ifdef CHASSIS_INLINE_DRIVE
   #ifdef ARCADE_CONTROL
-    int32_t horizontalAxis = Controller1.HORIZONTALAXIS.value()/2;
-    int32_t verticalAxis = Controller1.VERTICALAXIS.value()/2;
+    int32_t horizontalAxis = Controller1.HORIZONTALAXIS.value();
+    int32_t verticalAxis = Controller1.VERTICALAXIS.value();
     
     updateDriveMotors((verticalAxis + horizontalAxis), (verticalAxis - horizontalAxis));
 
@@ -128,7 +130,7 @@ void moveLinear(float distance, int velocity, uint32_t timeOut)
     DriveR_Power = (velocity/100.0f) * (pidCalculate(&driveR_PID, rotations, rightRevAvg) / 100.0);
     DriveL_Power = (velocity/100.0f) * (pidCalculate(&driveL_PID, rotations, leftRevAvg) / 100.0);
     
-    updateDriveMotorVolts(DriveL_Power, DriveR_Power);
+    updateDriveMotorVolts(12*DriveL_Power, 12*DriveR_Power);
     
   }while((fabs(driveR_PID.avgError) > 0.03 || fabs(driveL_PID.avgError) > 0.03) && (Brain.timer(timeUnits::msec) - startTime < timeOut));
 
@@ -243,6 +245,8 @@ void moveRotate(int16_t degrees, int velocity, uint32_t timeOut)
   //end do-while
 
 #elif !defined(PID) && !defined(GYRO)
+  Brain.Screen.newLine();
+  Brain.Screen.print("Doing basing rotate");
   for(uint8_t i = 0; i<numDriveMotors; i++)
   {
     leftDriveMotors[i].spinFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
