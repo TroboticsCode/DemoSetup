@@ -39,7 +39,7 @@ void initDriveMotors();
  * Perspective is from rear of robot
  *  looking forward
  */
-//update drive motor ports here
+//update drive motor ports here - front ports, then middle, then rear
 static int32_t leftDrivePorts[] = {PORT1, PORT2, PORT3};
 static int32_t rightDrivePorts[] = {PORT4, PORT5, PORT6};
 

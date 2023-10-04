@@ -99,7 +99,6 @@ void moveLinear(float distance, int velocity, uint32_t timeOut)
   Brain.Screen.newLine();
   Brain.Screen.print("Rotation Factor: %f", ROTATION_FACTOR);
 
-
 #if defined(PID)
   float DriveR_Power = 0;
   float DriveL_Power = 0;
@@ -134,15 +133,20 @@ void moveLinear(float distance, int velocity, uint32_t timeOut)
   }while((fabs(driveR_PID.avgError) > 0.03 || fabs(driveL_PID.avgError) > 0.03) && (Brain.timer(timeUnits::msec) - startTime < timeOut));
 
 #elif !defined (PID)
-  #if defined (CHASSIS_2_MOTOR_INLINE)
-    DriveRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
-    DriveLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
-  #elif defined (CHASSIS_4_MOTOR_INLINE)
-    FrontLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
-    BackLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
-    FrontRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
-    BackRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, true);
-  #endif
+  for(uint8_t i = 0; i<numDriveMotors; i++)
+  {
+    leftDriveMotors[i].spinFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+
+    if(i == numDriveMotors-1) //this is the last motor in the array and needs to be blocking so we complete the move
+    {
+      rightDriveMotors[i].spinFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, true);
+    }
+    else
+    {
+      rightDriveMotors[i].spinFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+    }
+
+  }
 #endif
 }
 
@@ -185,20 +189,12 @@ void moveRotate(int16_t degrees, int velocity, uint32_t timeOut)
     myGyro.resetRotation();
   #endif
 
-  #ifdef CHASSIS_2_MOTOR_INLINE
-    DriveLeft.resetRotation();
-    DriveRight.resetRotation();
-  #elif defined CHASSIS_4_MOTOR_INLINE
-    FrontLeft.resetRotation();
-    FrontRight.resetRotation();
-    BackLeft.resetRotation();
-    BackRight.resetRotation();
+  resetDriveRotations();  
 
-    double leftRevAvg  = 0;
-    double rightRevAvg = 0;
+  double leftRevAvg  = 0;
+  double rightRevAvg = 0;
 
-    uint64_t startTime = Brain.timer(timeUnits::msec);
-  #endif
+  uint64_t startTime = Brain.timer(timeUnits::msec);
 
   #if !defined GYRO
     pidStruct_t rotateR_PID;
@@ -221,44 +217,20 @@ void moveRotate(int16_t degrees, int velocity, uint32_t timeOut)
   {
   #if defined (GYRO)
     motorPower = (velocity/100.0f) * pidCalculate(&rotatePID, degrees, myGyro.rotation(rotationUnits::deg));
-  #elif !defined (GYRO)
-    #ifdef CHASSIS_4_MOTOR_INLINE
-      leftRevAvg = (BackLeft.rotation(rev) + FrontLeft.rotation(rev)) / 2.0;
-      rightRevAvg = (BackRight.rotation(rev) + FrontRight.rotation(rev)) / 2.0;
+  #elif !defined (GYRO)    
+    leftRevAvg = getMotorAvgRotations(leftDriveMotors);
+    rightRevAvg = getMotorAvgRotations(rightDriveMotors);
 
-      DriveL_Power = (velocity/100.0f) * pidCalculate(&rotateL_PID, rotations, -1.0 * leftRevAvg) / 100.0f;
-      DriveR_Power = (velocity/100.0f) * pidCalculate(&rotateR_PID, rotations, rightRevAvg) / 100.0f;
-    #elif defined CHASSIS_2_MOTOR_INLINE
-      DriveL_Power = (velocity/100.0f) * pidCalculate(&rotateL_PID, rotations, DriveLeft.rotation(rev) / 100.0f);
-      DriveR_Power = (velocity/100.0f) * pidCalculate(&rotateR_PID, rotations, -1.0f * DriveRight.rotation(rev) / 100.0f);
-    #endif
+    DriveL_Power = (velocity/100.0f) * pidCalculate(&rotateL_PID, rotations, -1.0 * leftRevAvg) / 100.0f;
+    DriveR_Power = (velocity/100.0f) * pidCalculate(&rotateR_PID, rotations, rightRevAvg) / 100.0f;    
   #endif
 
   #if defined (GYRO)
     printPIDValues(&rotatePID);
-    #ifdef CHASSIS_4_MOTOR_INLINE
-      FrontRight.spin(reverse, 12 * motorPower, voltageUnits::volt);
-      FrontLeft.spin(forward, 12 * motorPower, voltageUnits::volt);
-      BackLeft.spin(forward, 12 * motorPower, voltageUnits::volt);
-      BackRight.spin(reverse, 12 * motorPower, voltageUnits::volt);
-
-    #elif defined CHASSIS_2_MOTOR_INLINE
-      DriveRight.spin(reverse, 12 * motorPower, voltageUnits::volt);
-      DriveLeft.spin(forward, 12 * motorPower, voltageUnits::volt);
-    #endif
-
+    updateDriveMotorVolts((12*motorPower), (-12*motorPower));
   #else 
     printPIDValues(&rotateR_PID);
-    #ifdef CHASSIS_4_MOTOR_INLINE
-      FrontRight.spin(forward, 12 * DriveR_Power, voltageUnits::volt);
-      FrontLeft.spin(reverse, 12 * DriveL_Power, voltageUnits::volt);
-      BackLeft.spin(reverse, 12 * DriveL_Power, voltageUnits::volt);
-      BackRight.spin(forward, 12 * DriveR_Power, voltageUnits::volt);
-
-    #elif defined CHASSIS_2_MOTOR_INLINE
-      DriveRight.spin(reverse, 12 * DriveR_Power, voltageUnits::volt);
-      DriveLeft.spin(forward, 12 * DriveL_Power, voltageUnits::volt);
-    #endif
+    updateDriveMotorVolts(12*DriveL_Power, 12*DriveR_Power);
   #endif
 
   wait(10, msec);
@@ -271,16 +243,19 @@ void moveRotate(int16_t degrees, int velocity, uint32_t timeOut)
   //end do-while
 
 #elif !defined(PID) && !defined(GYRO)
-  #ifdef CHASSIS_4_MOTOR_INLINE
-    FrontLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
-    BackLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
-    FrontRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
-    BackRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+  for(uint8_t i = 0; i<numDriveMotors; i++)
+  {
+    leftDriveMotors[i].spinFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
 
-  #elif defined CHASSIS_2_MOTOR_INLINE
-    DriveRight.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
-    DriveLeft.rotateFor(rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
-  #endif
+    if(i == numDriveMotors-1) //this is the last motor in the array and needs to be blocking so we complete the move
+    {
+      rightDriveMotors[i].spinFor(-1*rotations, rotationUnits::rev, velocity, velocityUnits::pct, true);
+    }
+    else
+    {
+      rightDriveMotors[i].spinFor(-1*rotations, rotationUnits::rev, velocity, velocityUnits::pct, false);
+    }
+  }
 #endif
 }
 
