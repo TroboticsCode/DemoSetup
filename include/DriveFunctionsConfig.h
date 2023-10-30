@@ -86,6 +86,7 @@ static const uint8_t numDriveMotors = sizeof(leftDrivePorts)/sizeof(int32_t);
  * uncomment the size of drive wheel you are using
  */
 #define WHEEL_SIZE    4.0f
+//#define WHEEL_SIZE  3.25f
 //#define WHEEL_SIZE  2.75f
 
 /*     Gear Ratio 
