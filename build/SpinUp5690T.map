@@ -3728,7 +3728,7 @@ LOAD c:\Users\jpbor\AppData\Roaming\Code\User\globalStorage\vexrobotics.vexcode\
 LOAD c:\Users\jpbor\AppData\Roaming\Code\User\globalStorage\vexrobotics.vexcode\sdk\cpp\V5\V5_20220726_10_00_00/vexv5/gcc/libs\libm.a
 LOAD c:\Users\jpbor\AppData\Roaming\Code\User\globalStorage\vexrobotics.vexcode\sdk\cpp\V5\V5_20220726_10_00_00/vexv5/gcc/libs\libgcc.a
 END GROUP
-OUTPUT(build/DemoSetup.elf elf32-littlearm)
+OUTPUT(build/SpinUp5690T.elf elf32-littlearm)
 
 .comment        0x00000000       0x9d
  .comment       0x00000000       0x2d build/src/Functions.o
