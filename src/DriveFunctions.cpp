@@ -8,7 +8,7 @@
 using namespace vex;
 
 void updateDriveMotors(int leftDriveVal, int rightDriveVal);
-void updateDriveMotorVolts(int leftVoltage, int rightVoltage);
+void updateDriveMotorVolts(float leftVoltage, float rightVoltage);
 void setDriveBrake(brakeType brake_type);
 float getMotorAvgRotations(vector<motor> motorGroup);
 void resetDriveRotations(void);
@@ -277,7 +277,7 @@ void updateDriveMotors(int leftDriveVal, int rightDriveVal)
   }
 }
 
-void updateDriveMotorVolts(int leftVoltage, int rightVoltage)
+void updateDriveMotorVolts(float leftVoltage, float rightVoltage)
 {
   for(uint8_t i = 0; i < numDriveMotors; i++)
   {
